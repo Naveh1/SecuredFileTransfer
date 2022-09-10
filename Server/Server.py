@@ -5,7 +5,7 @@ PORT_FILE_NAME = "port.info"
 DEFAULT_PORT = 1234
 LOCAL_HOST = "127.0.0.1"
 
-class Server():
+class Server:
     host : str
     port : int
 
