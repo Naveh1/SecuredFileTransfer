@@ -1,5 +1,6 @@
 import socket
 import _thread
+from MemoryManager import *
 
 PORT_FILE_NAME = "port.info"
 DEFAULT_PORT = 1234
@@ -8,8 +9,10 @@ LOCAL_HOST = "127.0.0.1"
 class Server:
     host : str
     port : int
+    memMngr : MemoryManager
 
     def __init__(self, portFile = PORT_FILE_NAME) -> None:
+        self.memMngr = MemoryManager()
         self.host = LOCAL_HOST
         try:
             with open(portFile, "r") as f:
@@ -32,7 +35,7 @@ class Server:
                 _thread.start_new_thread(self.manageClient, (Client, ))
 
     def manageClient(self, connection):
-        print("Client accepted")
+        self.memMngr.debug()
         connection.close()
 
 

@@ -1,7 +1,9 @@
 import sqlite3
-from sqlite3.dbapi2 import Connection
+from sqlite3.dbapi2 import Connection, Date
 from urllib.request import pathname2url
-import Crypto.Cipher
+from Crypto.Cipher import AES
+from Crypto.PublicKey import RSA
+
 
 DB_NAME = "server.db"
 BITS = 8
@@ -17,9 +19,9 @@ FILE_PATH_SIZE = 256
 class Client:
     ID : int
     name : str
-    publicKey = pass
-    lastSeen = pass
-    AESKey = pass
+    publicKey : RSA.RsaKey
+    lastSeen : Date
+    AESKey : bytes
 
     def __init__(self, id : int, name : str, publicKey, lastSeen, AESKey) -> None:
         self.ID = id
@@ -43,33 +45,29 @@ class file:
 class dbManager:
     conn : Connection
     def __init__(self, dbName : str = DB_NAME) -> None:
-        try:
-            dburi = str('file:{}?mode=rw').format(pathname2url(DB_NAME))
-            self.conn = sqlite3.connect(dburi, uri=True)
-        except sqlite3.OperationalError:
-            self.createDB(dbName)
+        self.createDB()
 
     def createDB(self, dbName : str = DB_NAME):
-        self.conn = sqlite3.connect()
+        self.conn = sqlite3.connect(dbName)
         cur = self.conn.cursor()
 
-        clientsTable = """CREATE TABLE clients(
-        ID CHAR({ID_SIZE}) NOT NULL PRIMARY KEY,
-        Name CHAR({NAME_SIZE}) NOT NULL,
-        PublicKey char({PUBLIC_KEY_SIZE}),
+        clientsTable = """CREATE TABLE IF NOT EXISTS clients(
+        ID CHAR( %d ) NOT NULL PRIMARY KEY,
+        Name CHAR( %d ) NOT NULL,
+        PublicKey CHAR( %d ),
         LastSeen DATE,
-        AES_KEY BINARY({AES_KEY_SIZE})
-        );"""
+        AES_KEY BINARY( %d )
+        );""" % (ID_SIZE, NAME_SIZE, PUBLIC_KEY_SIZE, AES_KEY_SIZE)
 
-        filesTable = """CREATE TABLE files(
-        ID CHAR({ID_SIZE}) NOT NULL,
-        FileName CHAR({FILE_NAME_SIZE}) NOT NULL,
-        FilePath CHAR({FILE_PATH_SIZE}) NOT NULL,
+        filesTable = """CREATE TABLE IF NOT EXISTS files(
+        ID CHAR( %d ) NOT NULL,
+        FileName CHAR( %d ) NOT NULL,
+        FilePath CHAR( %d ) NOT NULL,
         Verified BOOLEAN,
         
         PRIMARY KEY(ID, FileName, FilePath),
         FOREIGN KEY(ID) REFERENCES clients(ID)
-        );"""
+        );""" %  (ID_SIZE, FILE_NAME_SIZE, FILE_PATH_SIZE)
 
         try:
             cur.execute(clientsTable)
@@ -82,17 +80,17 @@ class dbManager:
     def loadDB(self) -> tuple:
         cur = self.conn.cursor()
 
-        cur.execute("SELECT * FROM CLIENTS")
+        cur.execute("SELECT * FROM clients")
         clientsRows = cur.fetchall()
 
-        cur.execute("SELECT * FROM FILES")
+        cur.execute("SELECT * FROM files")
         filesRows = cur.fetchall()
 
         clients = list()
         files = list()
 
         for clientRow in clientsRows:
-            clients.append(Client(clientRow[0], clientRow[1], clientRow[2], clientRow[3])
+            clients.append(Client(clientRow[0], clientRow[1], clientRow[2], clientRow[3]))
         for fileRow in filesRows:
-            files.append(File(fileRow[0], fileRow[1], fileRow[2], fileRow[3])
+            files.append(File(fileRow[0], fileRow[1], fileRow[2], fileRow[3]))
         return clients, files
