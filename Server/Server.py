@@ -1,6 +1,7 @@
 import socket
 import _thread
 from MemoryManager import *
+from RequestProcessor import *
 
 PORT_FILE_NAME = "port.info"
 DEFAULT_PORT = 1234
@@ -32,11 +33,30 @@ class Server:
             while True:
                 Client, address = sock.accept()
                 print('Connected to: ' + address[0] + ':' + str(address[1]))
-                _thread.start_new_thread(self.manageClient, (Client, ))
+                _thread.start_new_thread(self.manageClient, (Client, address
 
-    def manageClient(self, connection):
-        self.memMngr.debug()
-        connection.close()
+    def manageClient(self, connection, address):
+        print(f"Connected by {addr}")
+
+        with connection:
+            self.memMngr.debug() #test
+
+            req = connection.recv(1024)
+            try:
+                reqProc : RequestProcessor = RequestProcessor(req, self.memMngr)
+            except Exception:
+                pass #if code 2100 - REGISTRATION FAILED RESPONSE: CODE 2101
+            if reqProc.getCode() == REGISTRATION:
+                try:
+                    reqProc.procReq()
+                except Exception:
+                    pass # REGISTRATION FAILED RESPONSE: CODE 2101
+            elif reqProc.getCode() == PUBLIC_KEY:
+                try:
+                    reqProc.procReq()
+                except Exception:
+                    pass #I DONT KNOW WHAT THE HECK SHOULD I DO HERE STUPID COURSE THEY CAN'T EVEN HANDLE SIMPLE PROTOCOL IN THE PROJECT
+            connection.close()
 
 
 
