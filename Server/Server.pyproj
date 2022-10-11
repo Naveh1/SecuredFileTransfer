@@ -27,6 +27,7 @@
     <Compile Include="MemoryManager.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="RequestProcessor.py" />
     <Compile Include="ResponseProcessor.py">
       <SubType>Code</SubType>
     </Compile>

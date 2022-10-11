@@ -3,6 +3,7 @@ from sqlite3.dbapi2 import Connection, Date
 from urllib.request import pathname2url
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
+import datetime
 
 
 DB_NAME = "server.db"
@@ -20,11 +21,11 @@ class Client:
     ID : int
     name : str
     publicKey : RSA.RsaKey
-    lastSeen : Date
+    lastSeen : str
     AESKey : bytes
 
-    def __init__(self, id : int, name : str, publicKey, lastSeen, AESKey) -> None:
-        self.ID = id
+    def __init__(self, ID : int, name : str, publicKey = b"\0", lastSeen = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") ,AESKey = b"\0") -> None:
+        self.ID = ID
         self.name = name
         self.publicKey = publicKey
         self.lastSeen = lastSeen
@@ -36,7 +37,7 @@ class file:
     PathName : str
     Verified : bool
 
-    def __init__(self, id : int, fileName : str, pathName : str, verified : bool) ->None:
+    def __init__(self, id : int, fileName : str, pathName : str, verified : bool = False) ->None:
         self.ID = id
         self.fileName = fileName
         self.pathName = pathName
@@ -54,8 +55,8 @@ class dbManager:
         clientsTable = """CREATE TABLE IF NOT EXISTS clients(
         ID CHAR( %d ) NOT NULL PRIMARY KEY,
         Name CHAR( %d ) NOT NULL,
-        PublicKey CHAR( %d ),
-        LastSeen DATE,
+        PublicKey BLOB( %d ),
+        LastSeen DATE NOT NULL,
         AES_KEY BINARY( %d )
         );""" % (ID_SIZE, NAME_SIZE, PUBLIC_KEY_SIZE, AES_KEY_SIZE)
 
@@ -73,8 +74,8 @@ class dbManager:
             cur.execute(clientsTable)
             cur.execute(filesTable)
         finally:
-            self.conn.commit()
             cur.close()
+            self.conn.commit()
         
 
     def loadDB(self) -> tuple:
@@ -92,5 +93,20 @@ class dbManager:
         for clientRow in clientsRows:
             clients.append(Client(clientRow[0], clientRow[1], clientRow[2], clientRow[3]))
         for fileRow in filesRows:
-            files.append(File(fileRow[0], fileRow[1], fileRow[2], fileRow[3]))
+            files.append(file(fileRow[0], fileRow[1], fileRow[2], fileRow[3]))
         return clients, files
+
+    def insertClient(self, ID, name):
+        cur = self.conn.cursor()
+
+        cur.execute("INSERT INTO users(ID, Name, LastSeen) VALUES(?, ?, datetime('now','localtime'))", (ID, name))
+
+        cur.close()
+        self.conn.commit()
+    
+    def updateUser(self, colum : str, value, key):
+        cur = self.conn.cursor()
+        cur.execute("UPDATE users SET ? = ? WHERE ID = ?", (colum, value, key))
+        cur.close()
+        self.conn.commit()
+        
