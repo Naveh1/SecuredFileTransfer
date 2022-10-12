@@ -39,7 +39,7 @@ class Server:
                 _thread.start_new_thread(self.manageClient, (Client, address))
     
     def manageClient(self, connection, address):
-        print(f"Connected by {addr}")
+        print(f"Connection by {address}")
         with connection:
             self.memMngr.debug() #test
 

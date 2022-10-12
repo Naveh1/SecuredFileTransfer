@@ -37,8 +37,12 @@ int main()
 	if (!infoFile)
 	{
 		infoFile = std::ifstream(TRANSFER_INFO_FILE);
-
-		std::cout << "Read file and register";
+		if (!infoFile)
+		{
+			std::cout << "Couldn't file transfer info file! aborting" << std::endl;
+			return 0;
+		}
+		std::cout << "Read file and register" << std::endl;
 		//getting ip
 		getline(infoFile, ip, ':');
 
@@ -72,13 +76,23 @@ int main()
 		//getting file name
 		getline(infoFile, file);
 
-		if (!existsTest(file))
+		/*if (!existsTest(file))
 		{
 			std::cerr << "Error opening file" << std::endl;
 			return 0;
-		}
+		}*/
 
-		boost::asio::connect(s, resolver.resolve(ip, std::to_string(port)));
+		Sleep(5000);
+
+		std::cout << "Connecting to " << ip << " on port " << std::to_string(port) << std::endl;
+
+		try {
+			boost::asio::connect(s, resolver.resolve(ip, std::to_string(port)));
+		}
+		catch (std::exception& e) {
+			std::cerr << "Error connecting: " << e.what() << std::endl;
+			return 0;
+		}
 		//send registration request
 		RequestProcessor req(VERSION, REGISTRAYION, NAME_LEN, name.c_str());
 		boost::asio::write(s, boost::asio::buffer(req.serializeResponse()));
@@ -91,7 +105,7 @@ int main()
 		resp.processResponse();
 
 		if (resp.getCode() == REGISTRATION_FAIL)
-			exit(0);
+			return 0;
 	}
 
 	return 0;

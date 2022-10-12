@@ -1,4 +1,5 @@
 #include "RequestProcessor.h"
+#include "ResponseProcessor.h"
 #include <string>
 
 
@@ -25,7 +26,15 @@ std::vector<char> RequestProcessor::serializeResponse() const
 
 std::string padString(const std::string& str, const int len)
 {
-    return std::string((len - str.length()), '0').append(str);
+    std::cout << "1";
+    //try {
+        std::string padding(len - str.size(), '0');
+        return padding.append(str);
+    /* }
+    catch (std::exception& e) {
+        std::cout << "Error padding: " << e.what() << std::endl;
+        exit(0);
+    }*/
 }
 
 std::string RequestProcessor::responseToString() const
@@ -36,7 +45,24 @@ std::string RequestProcessor::responseToString() const
     *//*
     std::string unpaddedSize = std::to_string(_payloadSize);
     std::string paddedPayloadSize = std::string((PAYLOAD_SIZE - unpaddedSize.length()), '0').append(unpaddedSize);*/
+    std::cout << "payload: " << _payload << std::endl;
+    return std::string(_clientID) + numberToBytes<uint8_t>(_version, VERSION_LEN) + padString(numberToBytes<uint16_t>(_code, CODE_LEN), CODE_LEN)
+        + padString(numberToBytes<uint32_t>(_payloadSize, PAYLOAD_SIZE), PAYLOAD_SIZE) + padString(std::string(_payload), _payloadSize);
+}
 
-    return std::string(_clientID) + std::to_string(_version) + padString(std::to_string(_code), CODE_LEN)
-        + padString(std::to_string(_payloadSize), PAYLOAD_SIZE) + padString(std::string(_payload), _payloadSize);
+
+template <typename T>
+std::string RequestProcessor::numberToBytes(const T number, const int len)
+{
+    char* resChar = new char[len];
+
+    for (int i = 0; i < len; i++)
+    {
+        resChar[i] = (uint8_t)(number >> i * BYTE);
+    }
+
+    std::string res(resChar);
+    delete[] resChar;
+
+    return res;
 }

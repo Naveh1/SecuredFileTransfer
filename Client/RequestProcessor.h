@@ -15,6 +15,9 @@ public:
 	std::vector<char> serializeResponse() const;
 	std::string responseToString() const;
 
+	template <typename T>
+	static std::string numberToBytes(const T number, const int len);
+
 private:
 	char _clientID[CLIENT_ID_LEN];
 	uint8_t _version;
