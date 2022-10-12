@@ -46,7 +46,7 @@ class RequestProcessor:
     def regUser(self):
         if self.req.payloadSize != NAME_LEN:
             raise "Illegal register size"
-        self.memMngr.regUser(self.req.clientID, self.req.payload.decode('utf-8'))
+        return self.memMngr.regUser(self.req.payload.decode('utf-8'))
 
     def signKey(self):
         if self.req.payloadSize != NAME_LEN + PUBLIC_KEY_LEN:
@@ -59,7 +59,7 @@ class RequestProcessor:
     def procReq(self):
         code = self.req.code
         if code == REGISTRATION:
-            self.regUser()
+            return self.regUser()
         elif code == PUBLIC_KEY:
             self.signKey()
         elif code == SEND_FILE:

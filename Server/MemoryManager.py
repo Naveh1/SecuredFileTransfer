@@ -16,24 +16,27 @@ class MemoryManager:
 
     def debug(self):
         try:
-            self.lock.acquire
+            self.lock.acquire()
             print(self.clients)
         finally:
             self.lock.release()
 
-    def regUser(self, ID : int, name : str):
+    def regUser(self, name : str):
         try:
-            self.lock.acquire
-            if ID in self.clients:
-                raise "Client already exists"
+            self.lock.acquire()
+
+            for key, value in self.clients:
+                if value.name == name:
+                    raise "Client already exists"
+
+            ID = self.db.insertClient(name)
             self.clients[ID] = Client(ID, name)
-            #self.db.
         finally:
             self.lock.release()
     
     def signPublicKey(self, ID : int, name : str, key):
         try:
-            self.lock.acquire
+            self.lock.acquire()
 
             if ID not in self.clients:
                 raise "Client does not exist"

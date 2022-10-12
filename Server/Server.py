@@ -55,8 +55,7 @@ class Server:
                 try:
                     reqProc.procReq()
                 except Exception:
-                    pass #I DONT KNOW WHAT THE HECK SHOULD I DO HERE STUPID COURSE THEY CAN'T EVEN HANDLE SIMPLE PROTOCOL IN THE PROJECT
-            connection.close()
+                    print("Error occured with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
 
 
 

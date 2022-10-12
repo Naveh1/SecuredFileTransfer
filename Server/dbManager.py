@@ -96,13 +96,16 @@ class dbManager:
             files.append(file(fileRow[0], fileRow[1], fileRow[2], fileRow[3]))
         return clients, files
 
-    def insertClient(self, ID, name):
+    def insertClient(self, name):
         cur = self.conn.cursor()
 
-        cur.execute("INSERT INTO users(ID, Name, LastSeen) VALUES(?, ?, datetime('now','localtime'))", (ID, name))
-
+        cur.execute("INSERT INTO users(Name, LastSeen) VALUES(?, ?, datetime('now','localtime'))", (name, ))
+        cur.execute("SELECT ID from users WHERE NAME = ?", (name, ))
+        ID = cur.fetchall()[0]
         cur.close()
         self.conn.commit()
+
+        return ID
     
     def updateUser(self, colum : str, value, key):
         cur = self.conn.cursor()
