@@ -36,6 +36,9 @@ int main()
 
 		//getting file name
 		getline(infoFile, file);
+
+		boost::asio::connect(s, resolver.resolve(ip, std::to_string(port)));
+		//send registration request
 	}
 	
 	
