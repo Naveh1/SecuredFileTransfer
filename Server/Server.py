@@ -41,27 +41,24 @@ class Server:
     def manageClient(self, connection, address):
         print(f"Connection by {address}")
         with connection:
-            self.memMngr.debug() #test
-
             req = connection.recv(1024)
             try:
-                reqProc : RequestProcessor = RequestProcessor(req, self.memMngr)
+                reqProc : RequestProcessor= RequestProcessor(req, self.memMngr)
+                if reqProc.getCode() == REGISTRATION:
+                    try:
+                        ID = reqProc.procReq()
+                        respProc = ResponseProcessor(VERSION, REGISTRATION_SUCCESS, ID_SIZE, ID)
+                        connection.sendall(respProc.serializeResponse())
+                    except Exception:
+                        respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
+                        connection.sendall(respProc.serializeResponse())
+                elif reqProc.getCode() == PUBLIC_KEY:
+                    try:
+                        reqProc.procReq()
+                    except Exception:
+                        print("Error occurred with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
             except Exception:
                 pass #if code 2100 - REGISTRATION FAILED RESPONSE: CODE 2101
-            if reqProc.getCode() == REGISTRATION:
-                try:
-                    ID = reqProc.procReq()
-                    respProc = ResponseProcessor(VERSION, REGISTRATION_SUCCESS, ID_SIZE, ID)
-                    connection.sendall(respProc.serializeResponse())
-                except Exception:
-                    respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
-                    connection.sendall(respProc.serializeResponse())
-            elif reqProc.getCode() == PUBLIC_KEY:
-                try:
-                    reqProc.procReq()
-                except Exception:
-                    print("Error occurred with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
-
 
 
 def main():

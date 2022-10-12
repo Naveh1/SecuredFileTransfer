@@ -17,7 +17,7 @@ using boost::asio::ip::tcp;
 #define MIN_PORT 1024
 #define MAX_PORT 65536
 
-enum codes {REGISTRATION = 1100};
+enum codes {REGISTRAYION = 1100};
 
 bool existsTest(const std::string& name) {
 	std::ifstream f(name.c_str());
@@ -95,7 +95,7 @@ int main()
 		}
 		std::cout << "Name: " << name << std::endl;
 		//send registration request
-		RequestProcessor req(VERSION, REGISTRATION, NAME_LEN, name.c_str());
+		RequestProcessor req(VERSION, REGISTRAYION, NAME_LEN, name.c_str());
 		boost::asio::write(s, boost::asio::buffer(req.serializeResponse()));
 	
 		std::string reply;

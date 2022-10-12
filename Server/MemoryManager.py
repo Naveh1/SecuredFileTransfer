@@ -14,12 +14,6 @@ class MemoryManager:
             self.clients[client.id] = client
         self.lock = _thread.allocate_lock()
 
-    def debug(self):
-        try:
-            self.lock.acquire()
-            print(self.clients)
-        finally:
-            self.lock.release()
 
     def regUser(self, name : str):
         try:
