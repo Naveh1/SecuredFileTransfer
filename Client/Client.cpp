@@ -3,6 +3,7 @@
 #include <boost/asio.hpp>
 #include <string>
 #include "RequestProcessor.h"
+#include "ResponseProcessor.h"
 
 #define INFO_FILE "me.info"
 #define TRANSFER_INFO_FILE "transfer.info"
@@ -84,6 +85,13 @@ int main()
 	
 		std::string reply;
 		boost::asio::read(s, boost::asio::buffer(reply));
+
+		ResponseProcessor resp(reply.c_str());
+
+		resp.processResponse();
+
+		if (resp.getCode() == REGISTRATION_FAIL)
+			exit(0);
 	}
 
 	return 0;

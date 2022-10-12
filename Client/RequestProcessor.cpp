@@ -10,6 +10,11 @@ RequestProcessor::RequestProcessor(const uint8_t version, const uint16_t code, c
 	strncpy_s(_payload, payloadSize, payload, payloadSize);
 }
 
+RequestProcessor::~RequestProcessor()
+{
+    delete[] _payload;
+}
+
 std::vector<char> RequestProcessor::serializeResponse() const
 {
     std::string str = responseToString();
