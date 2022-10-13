@@ -56,7 +56,7 @@ class dbManager:
         cur = self.conn.cursor()
 
         clientsTable = """CREATE TABLE IF NOT EXISTS clients(
-        ID CHAR( %d ) NOT NULL PRIMARY KEY,
+        ID CHAR( %d ) NOT NULL PRIMARY KEY AUTOINCREMENT,
         Name CHAR( %d ) NOT NULL,
         PublicKey BLOB( %d ),
         LastSeen DATE NOT NULL,
