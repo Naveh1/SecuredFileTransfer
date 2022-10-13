@@ -13,16 +13,15 @@ class MemoryManager:
         self.files = dict()
         clients, self.files = self.db.loadDB()
         for client in clients:
-            self.clients[client.id] = client
+            self.clients[client.ID] = client
         self.lock = _thread.allocate_lock()
 
 
     def regUser(self, name : str):
         try:
             self.lock.acquire()
-
-            for key, value in self.clients:
-                if value.name == name:
+            for value in self.clients.values():
+                if value == name:
                     raise Exception("Client already exists")
 
             ID = self.db.insertClient(name)

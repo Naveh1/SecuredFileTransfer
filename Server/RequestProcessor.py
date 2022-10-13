@@ -12,9 +12,8 @@ class Request:
 
     def __init__(self, req : bytes) -> None:
         try:
-            print(req[:TOTAL_LEN_WITHOUT_PAYLOAD])
             print(req)
-            unpacked = struct.unpack("<16sBHI", req[:TOTAL_LEN_WITHOUT_PAYLOAD])
+            unpacked = struct.unpack("<%dsBHI" % (ID_SIZE), req[:TOTAL_LEN_WITHOUT_PAYLOAD])
             self.clientID = unpacked[0].decode("utf-8")
             self.version = unpacked[1]
             self.code = unpacked[2]
@@ -23,12 +22,12 @@ class Request:
             self.payload = struct.unpack("<%ds" % (self.payloadSize), req[TOTAL_LEN_WITHOUT_PAYLOAD:])[0];
             #self.payload = unpacked[4]
 
-            print("Debug:")
-            print("ClientID: " + self.clientID)
-            print("Version: " + str(self.version))
-            print("Code: " + str(self.code))
-            print("PayloadSize: " + str(self.payloadSize))
-            print("Payload: " + str(self.payload))
+            #print("Debug:")
+            #print("ClientID: " + self.clientID)
+            #print("Version: " + str(self.version))
+            #print("Code: " + str(self.code))
+            #print("PayloadSize: " + str(self.payloadSize))
+            #print("Payload: " + str(self.payload))
             if self.payloadSize != len(self.payload):
                 raise  Exception("Unreliable payload size")
         except Exception as e:

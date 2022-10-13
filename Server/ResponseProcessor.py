@@ -1,6 +1,5 @@
 import struct
 
-from sqlite3.dbapi2 import paramstyle
 
 REGISTRATION_SUCCESS = 2100
 REGISTRATION_FAIL = 2101
@@ -28,6 +27,6 @@ class ResponseProcessor:
 
     def serializeResponse(self) -> bytes:
         if self.resp.code == REGISTRATION_FAIL or self.resp.code == RECEIVED_APPROVAL:
-            return struct.pack("<BHI", self.resp.code, self.resp.version, self.resp.payloadSize)
+            return struct.pack("<BHI", self.resp.version, self.resp.code, self.resp.payloadSize)
         elif self.resp.code == REGISTRATION_SUCCESS:
-            return struct.pack("<BHI16p", self.resp.code, self.resp.version, self.resp.payloadSize, self.resp.payload)
+            return struct.pack("<BHI%dp" % (self.resp.payloadSize), self.resp.version, self.resp.code, self.resp.payloadSize, self.resp.payload)
