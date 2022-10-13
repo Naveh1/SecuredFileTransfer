@@ -1,7 +1,7 @@
 import struct
 from MemoryManager import *
 
-TOTAL_LEN_WITHOUT_PAYLOAD = 136
+TOTAL_LEN_WITHOUT_PAYLOAD = 24
 
 class Request:
     clientID : str
@@ -28,9 +28,9 @@ class Request:
             print("payload size: " + self.payloadSize)
             print("payload: " + self.payload)
             if self.payloadSize != len(self.payload):
-                raise "Unreliable payload size"
+                raise  Exception("Unreliable payload size")
         except Exception as e:
-            raise "Bad request"
+            raise  Exception("Bad request")
 
 REGISTRATION = 1100
 PUBLIC_KEY = 1101
@@ -55,12 +55,12 @@ class RequestProcessor:
 
     def regUser(self):
         if self.req.payloadSize != NAME_LEN:
-            raise "Illegal register size"
+            raise  Exception("Illegal register size")
         return self.memMngr.regUser(self.req.payload.decode('utf-8'))
 
     def signKey(self):
         if self.req.payloadSize != NAME_LEN + PUBLIC_KEY_LEN:
-            raise "Illegal payload size"
+            raise  Exception("Illegal register size")
         name = self.req.payload.decode('utf-8')[:NAME_LEN]
         pkey = self.req.payload[NAME_LEN:]
 
@@ -81,4 +81,4 @@ class RequestProcessor:
         elif code == CRC_ERROR:
             pass
         else:
-            raise "Invalid code"
+            raise Exception("Invalid code")

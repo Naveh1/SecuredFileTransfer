@@ -98,6 +98,7 @@ int main()
 		std::cout << "Name: " << name << std::endl;
 		//send registration request
 		RequestProcessor req(VERSION, REGISTRATION, NAME_LEN, name.c_str());
+		std::cout << "len: "  << req.serializeResponse(true).size() << std::endl;;
 		boost::asio::write(s, boost::asio::buffer(req.serializeResponse(true)));
 	
 		//std::string reply(MAX_REPLY_LEN, '\0');

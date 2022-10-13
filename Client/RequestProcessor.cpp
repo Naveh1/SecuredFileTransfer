@@ -33,7 +33,7 @@ std::string padString(const std::string& str, const int len)
 std::string RequestProcessor::responseToString(const bool nullTerminator) const
 {
     int offset = nullTerminator ? 1 : 0;
-    return std::string(_clientID) + numberToBytes<uint8_t>(_version, VERSION_LEN) + padString(numberToBytes<uint16_t>(_code, CODE_LEN), CODE_LEN)
+    return padString(std::string(_clientID), CLIENT_ID_LEN) + numberToBytes<uint8_t>(_version, VERSION_LEN) + padString(numberToBytes<uint16_t>(_code, CODE_LEN), CODE_LEN)
         + padString(numberToBytes<uint32_t>(_payloadSize, PAYLOAD_SIZE), PAYLOAD_SIZE) + padString(std::string(_payload), _payloadSize - offset);
 }
 

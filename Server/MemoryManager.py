@@ -21,7 +21,7 @@ class MemoryManager:
 
             for key, value in self.clients:
                 if value.name == name:
-                    raise "Client already exists"
+                    raise Exception("Client already exists")
 
             ID = self.db.insertClient(name)
             self.clients[ID] = Client(ID, name)
@@ -33,9 +33,9 @@ class MemoryManager:
             self.lock.acquire()
 
             if ID not in self.clients:
-                raise "Client does not exist"
+                raise Exception("Client does not exist")
             elif self.clients[ID].name != name:
-                raise "Wrong name"
+                raise  Exception("Wrong name")
             else:
                 self.clients[ID].publicKey = key
                 self.db.updateUser("PublicKey", key, ID)
