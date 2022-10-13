@@ -9,6 +9,8 @@ class MemoryManager:
     
     def __init__(self) -> None:
         self.db = dbManager()
+        self.clients = dict()
+        self.files = dict()
         clients, self.files = self.db.loadDB()
         for client in clients:
             self.clients[client.id] = client

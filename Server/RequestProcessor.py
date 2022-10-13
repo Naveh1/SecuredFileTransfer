@@ -19,18 +19,16 @@ class Request:
             self.version = unpacked[1]
             self.code = unpacked[2]
             self.payloadSize = unpacked[3]
-            print("ClientID: " + self.clientID)
-            print("Version: " + str(self.version))
-            print("Code: " + str(self.code))
-            print("PayloadSize: " + str(self.payloadSize))
+
             self.payload = struct.unpack("<%ds" % (self.payloadSize), req[TOTAL_LEN_WITHOUT_PAYLOAD:])[0];
             #self.payload = unpacked[4]
 
             print("Debug:")
-            print("version: " + self.version)
-            print("code: " + self.code)
-            print("payload size: " + self.payloadSize)
-            print("payload: " + self.payload)
+            print("ClientID: " + self.clientID)
+            print("Version: " + str(self.version))
+            print("Code: " + str(self.code))
+            print("PayloadSize: " + str(self.payloadSize))
+            print("Payload: " + str(self.payload))
             if self.payloadSize != len(self.payload):
                 raise  Exception("Unreliable payload size")
         except Exception as e:

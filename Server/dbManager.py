@@ -46,10 +46,13 @@ class file:
 class dbManager:
     conn : Connection
     def __init__(self, dbName : str = DB_NAME) -> None:
-        self.createDB()
+        try:
+            self.conn = sqlite3.connect('file:%s?mode=rw' % (dbName), uri=True, check_same_thread=False)
+        except Exception:
+            self.createDB()
 
     def createDB(self, dbName : str = DB_NAME):
-        self.conn = sqlite3.connect(dbName)
+        self.conn = sqlite3.connect(dbName, check_same_thread=False)
         cur = self.conn.cursor()
 
         clientsTable = """CREATE TABLE IF NOT EXISTS clients(
@@ -99,8 +102,8 @@ class dbManager:
     def insertClient(self, name):
         cur = self.conn.cursor()
 
-        cur.execute("INSERT INTO users(Name, LastSeen) VALUES(?, ?, datetime('now','localtime'))", (name, ))
-        cur.execute("SELECT ID from users WHERE NAME = ?", (name, ))
+        cur.execute("INSERT INTO clients(Name, LastSeen) VALUES(?, datetime('now','localtime'))", (name, ))
+        cur.execute("SELECT ID from clients WHERE NAME = ?", (name, ))
         ID = cur.fetchall()[0]
         cur.close()
         self.conn.commit()
@@ -109,7 +112,7 @@ class dbManager:
     
     def updateUser(self, colum : str, value, key):
         cur = self.conn.cursor()
-        cur.execute("UPDATE users SET ? = ? WHERE ID = ?", (colum, value, key))
+        cur.execute("UPDATE clients SET ? = ? WHERE ID = ?", (colum, value, key))
         cur.close()
         self.conn.commit()
         

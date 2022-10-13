@@ -26,8 +26,9 @@ std::vector<char> RequestProcessor::serializeResponse(const bool nullTerminator)
 
 std::string padString(const std::string& str, const int len)
 {
-    std::string padding(len - str.size(), '\0');
-    return padding.append(str);
+    //std::string padding(len - str.size(), '\0');
+    //return padding.append(str);
+    return str + std::string(len - str.size(), '\0');
 }
 
 std::string RequestProcessor::responseToString(const bool nullTerminator) const

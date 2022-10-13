@@ -98,11 +98,11 @@ int main()
 		std::cout << "Name: " << name << std::endl;
 		//send registration request
 		RequestProcessor req(VERSION, REGISTRATION, NAME_LEN, name.c_str());
-		auto requ = req.serializeResponse(true);
+		/*auto requ = req.serializeResponse(true);
 		std::cout << "len: "  << requ.size() << std::endl;
 		for (char r : requ)
 			std::cout << r;
-		std::cout << std::endl;
+		std::cout << std::endl;*/
 		boost::asio::write(s, boost::asio::buffer(req.serializeResponse(true)));
 	
 		//std::string reply(MAX_REPLY_LEN, '\0');
