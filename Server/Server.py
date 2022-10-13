@@ -37,7 +37,7 @@ class Server:
                 Client, address = sock.accept()
                 print('Connected to: ' + address[0] + ':' + str(address[1]))
                 _thread.start_new_thread(self.manageClient, (Client, address))
-    
+
     def manageClient(self, connection, address):
         print(f"Connection by {address}")
         with connection:
@@ -49,10 +49,11 @@ class Server:
                 if reqProc.getCode() == REGISTRATION:
                     try:
                         ID = reqProc.procReq()
-                        respProc = ResponseProcessor(VERSION, REGISTRATION_SUCCESS, ID_SIZE, ID)
+                        respProc = ResponseProcessor(VERSION, REGISTRATION_SUCCESS, ID_SIZE, ID.encode())
                         connection.sendall(respProc.serializeResponse())
-                    except Exception:
+                    except Exception as e:
                         respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
+                        print(respProc.serializeResponse())
                         connection.sendall(respProc.serializeResponse())
                 elif reqProc.getCode() == PUBLIC_KEY:
                     try:

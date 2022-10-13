@@ -21,11 +21,12 @@ class MemoryManager:
         try:
             self.lock.acquire()
             for value in self.clients.values():
-                if value == name:
+                if value.name == name:
                     raise Exception("Client already exists")
 
             ID = self.db.insertClient(name)
             self.clients[ID] = Client(ID, name)
+            return ID
         finally:
             self.lock.release()
     

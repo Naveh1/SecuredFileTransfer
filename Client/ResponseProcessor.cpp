@@ -5,10 +5,17 @@
 template <typename T>
 T ResponseProcessor::deserialize(const char* buffer, const unsigned int len)
 {
-    unsigned char toCast = 0;
+    /*unsigned char toCast = 0;
     for (int i = 0; i < len; i++)
         toCast |= buffer[i] << (len - 1 - i) * BYTE;
-    return static_cast<T>(toCast);
+    return static_cast<T>(toCast);*/
+
+    T res = 0;
+
+    for (int i = 0; i < len; i++)
+        res |= (uint8_t)buffer[i] << i * BYTE;
+
+    return res;
 }
 
 ResponseProcessor::ResponseProcessor(const char* resp) : ResponseProcessor(deserialize<uint8_t>(resp, VERSION_LEN), 
@@ -21,6 +28,10 @@ ResponseProcessor::ResponseProcessor(const char* resp) : ResponseProcessor(deser
 
 ResponseProcessor::ResponseProcessor(const uint8_t version, const uint16_t code, const uint32_t payloadSize, const char* payload) : _version(version), _code(code), _payloadSize(payloadSize)
 {
+    if (!payloadSize) {
+        _payload = nullptr;
+        return;
+    }
 	_payload = new char[payloadSize];
 	strncpy_s(_payload, payloadSize, payload, payloadSize);
 }
@@ -35,7 +46,7 @@ void ResponseProcessor::processResponse(char* res) const
     switch (_code) 
     {
     case REGISTRATION_SUCCESS:
-        std::cout << "Registration succeeded!" << std::endl;
+        std::cout << "Registration succeeded!, id: " << this->_payload << std::endl;
         res = _payload;
         break;
     case REGISTRATION_FAIL:

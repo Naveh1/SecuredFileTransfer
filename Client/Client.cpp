@@ -106,27 +106,43 @@ int main()
 		boost::asio::write(s, boost::asio::buffer(req.serializeResponse(true)));
 	
 		//std::string reply(MAX_REPLY_LEN, '\0');
-		char reply[MAX_REPLY_LEN] = { 0 };
-
-		boost::asio::streambuf response;
+		char reply[MAX_REPLY_LEN];
+		size_t reply_len = 0;
+		try {
+			reply_len = boost::asio::read(s, boost::asio::buffer(reply, MAX_REPLY_LEN));
+		}
+		catch (const std::exception& e) {
+			std::cout << e.what() << std::endl;
+		}
+		/*boost::asio::streambuf response;
 	
 		try {
-			do {
+			/*do {
 				boost::asio::read(s, response, ec);
 				std::cout << ".";
 				Sleep(100);
-			} while (ec == boost::asio::error::eof);
+			} while (ec == boost::asio::error::eof);*//*
+			boost::asio::read(s, response, ec);
 			if (ec)
-				throw std::runtime_error(ec.message());
+				throw std::runtime_error(ec.message());*//*
+			size_t reply_len = 0;
+			do {
+				reply_len = boost::asio::read(s, boost::asio::buffer(reply, MAX_REPLY_LEN));
+				//reply_len = boost::asio::read(s, response, ec);
+				Sleep(100);
+				std::cout << ".";
+			} while (!reply_len);
+
 			//boost::asio::read(s, boost::asio::buffer(reply, MAX_REPLY_LEN));
 		}
 		catch (std::exception& e) {
 			std::cerr << "Error: " << e.what();
 			exit(0);
-		}
+		}*/
 
-		ResponseProcessor resp(std::string((std::istreambuf_iterator<char>(&response)), std::istreambuf_iterator<char>()).c_str());
-		//ResponseProcessor resp(reply);
+		//ResponseProcessor resp(std::string((std::istreambuf_iterator<char>(&response)), std::istreambuf_iterator<char>()).c_str());
+		std::cout << reply;
+		ResponseProcessor resp(reply);
 
 		resp.processResponse();
 

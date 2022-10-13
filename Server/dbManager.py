@@ -110,6 +110,7 @@ class dbManager:
                 error = False
             except Exception:
                 error = True
+        #print("Name: " + str(name))
         cur.execute("SELECT ID from clients WHERE NAME = ?", (name, ))
         ID = cur.fetchall()[0]
         cur.close()

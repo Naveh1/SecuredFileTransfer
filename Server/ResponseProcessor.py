@@ -29,4 +29,4 @@ class ResponseProcessor:
         if self.resp.code == REGISTRATION_FAIL or self.resp.code == RECEIVED_APPROVAL:
             return struct.pack("<BHI", self.resp.version, self.resp.code, self.resp.payloadSize)
         elif self.resp.code == REGISTRATION_SUCCESS:
-            return struct.pack("<BHI%dp" % (self.resp.payloadSize), self.resp.version, self.resp.code, self.resp.payloadSize, self.resp.payload)
+            return struct.pack("<BHI%ds" % (self.resp.payloadSize), self.resp.version, self.resp.code, self.resp.payloadSize, self.resp.payload)

@@ -28,5 +28,5 @@ public:
 	char* _payload;
 
 	template <typename T>
-	static T deserialize(const char* buffer, const unsigned int len);
+	static T deserialize(const char* buffer, const unsigned int len = sizeof(T));
 };
