@@ -4,6 +4,7 @@ from urllib.request import pathname2url
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
 import datetime
+import uuid
 
 
 DB_NAME = "server.db"
@@ -56,7 +57,7 @@ class dbManager:
         cur = self.conn.cursor()
 
         clientsTable = """CREATE TABLE IF NOT EXISTS clients(
-        ID CHAR( %d ) NOT NULL PRIMARY KEY AUTOINCREMENT,
+        ID CHAR( %d ) NOT NULL PRIMARY KEY,
         Name CHAR( %d ) NOT NULL,
         PublicKey BLOB( %d ),
         LastSeen DATE NOT NULL,
@@ -101,8 +102,14 @@ class dbManager:
 
     def insertClient(self, name):
         cur = self.conn.cursor()
+        error : bool = True
 
-        cur.execute("INSERT INTO clients(Name, LastSeen) VALUES(?, datetime('now','localtime'))", (name, ))
+        while error:
+            try:
+                cur.execute("INSERT INTO clients(ID, Name, LastSeen) VALUES(?, ?, datetime('now','localtime'))", (uuid.uuid4().hex, name))
+                error = False
+            except Exception:
+                error = True
         cur.execute("SELECT ID from clients WHERE NAME = ?", (name, ))
         ID = cur.fetchall()[0]
         cur.close()
