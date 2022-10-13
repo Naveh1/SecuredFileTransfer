@@ -33,7 +33,10 @@ ResponseProcessor::ResponseProcessor(const uint8_t version, const uint16_t code,
         return;
     }
 	_payload = new char[payloadSize];
-	strncpy_s(_payload, payloadSize, payload, payloadSize);
+    //_payload = std::string(payloadSize, '\0').c_str();
+	//strncpy_s(_payload, payloadSize, payload, payloadSize);
+
+    memcpy(_payload, payload, payloadSize);
 }
 
 uint16_t ResponseProcessor::getCode() const

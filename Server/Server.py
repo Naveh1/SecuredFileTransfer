@@ -49,11 +49,11 @@ class Server:
                 if reqProc.getCode() == REGISTRATION:
                     try:
                         ID = reqProc.procReq()
-                        respProc = ResponseProcessor(VERSION, REGISTRATION_SUCCESS, ID_SIZE, ID.encode())
+                        respProc = ResponseProcessor(VERSION, REGISTRATION_SUCCESS, ID_SIZE, ID)
                         connection.sendall(respProc.serializeResponse())
                     except Exception as e:
                         respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
-                        print(respProc.serializeResponse())
+                        print("Pack: " + respProc.serializeResponse())
                         connection.sendall(respProc.serializeResponse())
                 elif reqProc.getCode() == PUBLIC_KEY:
                     try:
