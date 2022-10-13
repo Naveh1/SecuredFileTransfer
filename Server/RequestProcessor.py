@@ -4,7 +4,7 @@ from MemoryManager import *
 TOTAL_LEN_WITHOUT_PAYLOAD = 136
 
 class Request:
-    clientID : int
+    clientID : str
     version : int
     code : int
     payloadSize : int
@@ -13,7 +13,7 @@ class Request:
     def __init__(self, req : bytes) -> None:
         try:
             print(req)
-            unpacked = struct.unpack("16PBHI", req[:TOTAL_LEN_WITHOUT_PAYLOAD])
+            unpacked = struct.unpack("16sBHI", req[:TOTAL_LEN_WITHOUT_PAYLOAD])
             self.clientID = unpacked[0]
             self.version = unpacked[1]
             self.code = unpacked[2]
