@@ -59,8 +59,11 @@ class Server:
                         reqProc.procReq()
                     except Exception:
                         print("Error occurred with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
-            except Exception:
-                pass #if code 2100 - REGISTRATION FAILED RESPONSE: CODE 2101
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                #print(e)
+                #pass #if code 2100 - REGISTRATION FAILED RESPONSE: CODE 2101
 
 
 def main():

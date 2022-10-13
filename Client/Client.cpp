@@ -103,15 +103,25 @@ int main()
 		//std::string reply(MAX_REPLY_LEN, '\0');
 		char reply[MAX_REPLY_LEN] = { 0 };
 
+		boost::asio::streambuf response;
+	
 		try {
-			boost::asio::read(s, boost::asio::buffer(reply, MAX_REPLY_LEN));
+			do {
+				boost::asio::read(s, response, ec);
+				std::cout << ".";
+				Sleep(100);
+			} while (ec == boost::asio::error::eof);
+			if (ec)
+				throw std::runtime_error(ec.message());
+			//boost::asio::read(s, boost::asio::buffer(reply, MAX_REPLY_LEN));
 		}
 		catch (std::exception& e) {
 			std::cerr << "Error: " << e.what();
 			exit(0);
 		}
 
-		ResponseProcessor resp(reply);
+		ResponseProcessor resp(std::string((std::istreambuf_iterator<char>(&response)), std::istreambuf_iterator<char>()).c_str());
+		//ResponseProcessor resp(reply);
 
 		resp.processResponse();
 

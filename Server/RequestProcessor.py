@@ -1,6 +1,8 @@
 import struct
 from MemoryManager import *
 
+TOTAL_LEN_WITHOUT_PAYLOAD = 136
+
 class Request:
     clientID : int
     version : int
@@ -8,14 +10,17 @@ class Request:
     payloadSize : int
     payload : bytes
 
-    def __init__(self, req) -> None:
+    def __init__(self, req : bytes) -> None:
         try:
-            unpacked = struct.unpack("16PBHIs", req)
+            print(req)
+            unpacked = struct.unpack("16PBHI", req[:TOTAL_LEN_WITHOUT_PAYLOAD])
             self.clientID = unpacked[0]
-            self.version = ord(unpacked[1])
+            self.version = unpacked[1]
             self.code = unpacked[2]
             self.payloadSize = unpacked[3]
-            self.payload = unpacked[4]
+            print(self.payloadSize)
+            self.payload = struct.unpack("%ds" % (self.payloadSize), req[TOTAL_LEN_WITHOUT_PAYLOAD:])[0];
+            #self.payload = unpacked[4]
 
             print("Debug:")
             print("version: " + self.version)
@@ -24,7 +29,7 @@ class Request:
             print("payload: " + self.payload)
             if self.payloadSize != len(self.payload):
                 raise "Unreliable payload size"
-        except Exception:
+        except Exception as e:
             raise "Bad request"
 
 REGISTRATION = 1100
