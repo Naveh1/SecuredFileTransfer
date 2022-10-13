@@ -17,6 +17,11 @@ class Request:
             self.payloadSize = unpacked[3]
             self.payload = unpacked[4]
 
+            print("Debug:")
+            print("version: " + self.version)
+            print("code: " + self.code)
+            print("payload size: " + self.payloadSize)
+            print("payload: " + self.payload)
             if self.payloadSize != len(self.payload):
                 raise "Unreliable payload size"
         except Exception:

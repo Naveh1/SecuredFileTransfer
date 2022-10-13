@@ -16,9 +16,9 @@ RequestProcessor::~RequestProcessor()
     delete[] _payload;
 }
 
-std::vector<char> RequestProcessor::serializeResponse() const
+std::vector<char> RequestProcessor::serializeResponse(const bool nullTerminator) const
 {
-    std::string str = responseToString();
+    std::string str = responseToString(nullTerminator);
     std::vector<char> bytes(str.begin(), str.end());
     bytes.push_back('\0');
     return bytes;
@@ -26,20 +26,15 @@ std::vector<char> RequestProcessor::serializeResponse() const
 
 std::string padString(const std::string& str, const int len)
 {
-    //try {
     std::string padding(len - str.size(), '0');
     return padding.append(str);
-    /* }
-    catch (std::exception& e) {
-        std::cout << "Error padding: " << e.what() << std::endl;
-        exit(0);
-    }*/
 }
 
-std::string RequestProcessor::responseToString() const
+std::string RequestProcessor::responseToString(const bool nullTerminator) const
 {
+    int offset = nullTerminator ? 1 : 0;
     return std::string(_clientID) + numberToBytes<uint8_t>(_version, VERSION_LEN) + padString(numberToBytes<uint16_t>(_code, CODE_LEN), CODE_LEN)
-        + padString(numberToBytes<uint32_t>(_payloadSize, PAYLOAD_SIZE), PAYLOAD_SIZE) + padString(std::string(_payload), _payloadSize);
+        + padString(numberToBytes<uint32_t>(_payloadSize, PAYLOAD_SIZE), PAYLOAD_SIZE) + padString(std::string(_payload), _payloadSize - offset);
 }
 
 

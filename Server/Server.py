@@ -42,8 +42,10 @@ class Server:
         print(f"Connection by {address}")
         with connection:
             req = connection.recv(1024)
+
+            #print(f"request received: {req}")
             try:
-                reqProc : RequestProcessor= RequestProcessor(req, self.memMngr)
+                reqProc : RequestProcessor = RequestProcessor(req, self.memMngr)
                 if reqProc.getCode() == REGISTRATION:
                     try:
                         ID = reqProc.procReq()
