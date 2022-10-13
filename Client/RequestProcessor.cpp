@@ -26,15 +26,17 @@ std::vector<char> RequestProcessor::serializeResponse(const bool nullTerminator)
 
 std::string padString(const std::string& str, const int len)
 {
-    std::string padding(len - str.size(), '0');
+    std::string padding(len - str.size(), '\0');
     return padding.append(str);
 }
 
 std::string RequestProcessor::responseToString(const bool nullTerminator) const
 {
     int offset = nullTerminator ? 1 : 0;
-    return padString(std::string(_clientID), CLIENT_ID_LEN) + numberToBytes<uint8_t>(_version, VERSION_LEN) + padString(numberToBytes<uint16_t>(_code, CODE_LEN), CODE_LEN)
-        + padString(numberToBytes<uint32_t>(_payloadSize, PAYLOAD_SIZE), PAYLOAD_SIZE) + padString(std::string(_payload), _payloadSize - offset);
+    std::string res = padString(std::string(_clientID), CLIENT_ID_LEN) + numberToBytes<uint8_t>(_version, VERSION_LEN);
+    res += padString(numberToBytes<uint16_t>(_code, CODE_LEN), CODE_LEN);
+    res += padString(numberToBytes<uint32_t>(_payloadSize, PAYLOAD_SIZE), PAYLOAD_SIZE);
+    return res + padString(std::string(_payload), _payloadSize - offset);
 }
 
 
