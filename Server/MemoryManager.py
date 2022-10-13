@@ -30,7 +30,7 @@ class MemoryManager:
         finally:
             self.lock.release()
     
-    def signPublicKey(self, ID : int, name : str, key):
+    def signPublicKey(self, ID : int, name : str, key : bytes):
         try:
             self.lock.acquire()
 

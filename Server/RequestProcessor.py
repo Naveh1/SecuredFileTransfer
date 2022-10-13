@@ -66,13 +66,14 @@ class RequestProcessor:
         pkey = self.req.payload[NAME_LEN:]
 
         self.memMngr.signPublicKey(self.req.clientID, name, pkey)
+        return pkey
 
     def procReq(self):
         code = self.req.code
         if code == REGISTRATION:
             return self.regUser()
         elif code == PUBLIC_KEY:
-            self.signKey()
+            return self.signKey()
         elif code == SEND_FILE:
             pass
         elif code == CRC_OK:

@@ -118,9 +118,10 @@ class dbManager:
 
         return ID
     
-    def updateUser(self, colum : str, value, key):
+    def updateUser(self, column : str, value, key):
         cur = self.conn.cursor()
-        cur.execute("UPDATE clients SET ? = ? WHERE ID = ?", (colum, value, key))
+        cur.execute("UPDATE clients SET %s = ? , LastSeen = datetime('now','localtime')) WHERE ID = ?" % (column), (value, key))
         cur.close()
+        self.conn.commit()
         self.conn.commit()
         
