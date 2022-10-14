@@ -6,7 +6,7 @@ class MemoryManager:
     clients : dict
     files : list
     lock : _thread.LockType
-    
+    ê
     def __init__(self) -> None:
         self.db = dbManager()
         self.clients = dict()

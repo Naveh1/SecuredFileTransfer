@@ -11,7 +11,7 @@
 class ResponseProcessor
 {
 public:
-	ResponseProcessor(const char* resp);			//deserialization d'tor
+	ResponseProcessor(const char* resp);			//deserialization c'tor
 	ResponseProcessor(const uint8_t _version, const uint16_t _code, const uint32_t _payloadSize, const char* _payload);
 
 	~ResponseProcessor();
@@ -20,7 +20,7 @@ public:
 	
 	void processResponse(char* res = NULL) const;
 
-	private:
+private:
 	uint8_t _version;
 	uint16_t _code;
 	uint32_t _payloadSize;

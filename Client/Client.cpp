@@ -4,6 +4,8 @@
 #include <string>
 #include "RequestProcessor.h"
 #include "ResponseProcessor.h"
+//#include <RSAWrapper.h>
+#include <cryptopp/rsa.h>
 
 #define INFO_FILE "me.info"
 #define TRANSFER_INFO_FILE "transfer.info"

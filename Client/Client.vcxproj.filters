@@ -24,6 +24,15 @@
     <ClCompile Include="ResponseProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Base64Wrapper.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RSAWrapper.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AESWrapper.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -34,6 +43,15 @@
     </ClInclude>
     <ClInclude Include="ResponseProcessor.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AESWrapper.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Base64Wrapper.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RSAWrapper.h">
+      <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
