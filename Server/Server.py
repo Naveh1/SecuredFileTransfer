@@ -53,7 +53,7 @@ class Server:
                         connection.sendall(respProc.serializeResponse())
                     except Exception as e:
                         respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
-                        print("Pack: " + respProc.serializeResponse())
+                        print("Pack: " + str(respProc.serializeResponse()))
                         connection.sendall(respProc.serializeResponse())
                 elif reqProc.getCode() == PUBLIC_KEY:
                     try:

@@ -17,6 +17,7 @@ public:
 	~ResponseProcessor();
 
 	uint16_t getCode() const;
+	const char* getPayload() const;
 	
 	void processResponse(char* res = NULL) const;
 

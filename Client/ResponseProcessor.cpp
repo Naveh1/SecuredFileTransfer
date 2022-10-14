@@ -44,6 +44,11 @@ uint16_t ResponseProcessor::getCode() const
     return _code;
 }
 
+const char* ResponseProcessor::getPayload() const
+{
+    return _payload;
+}
+
 void ResponseProcessor::processResponse(char* res) const
 {
     switch (_code) 

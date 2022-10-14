@@ -4,8 +4,14 @@
 #include <string>
 #include "RequestProcessor.h"
 #include "ResponseProcessor.h"
-//#include <RSAWrapper.h>
 #include <cryptopp/rsa.h>
+
+#include "Base64Wrapper.h"
+#include "RSAWrapper.h"
+#include "AESWrapper.h"
+
+#include <iomanip>
+
 
 #define INFO_FILE "me.info"
 #define TRANSFER_INFO_FILE "transfer.info"
@@ -26,6 +32,32 @@ enum codes {REGISTRATION = 1100};
 bool existsTest(const std::string& name) {
 	std::ifstream f(name.c_str());
 	return f.good();
+}
+
+void hexify(const unsigned char* buffer, unsigned int length)
+{
+	std::ios::fmtflags f(std::cout.flags());
+	std::cout << std::hex;
+	for (size_t i = 0; i < length; i++)
+		std::cout << std::setfill('0') << std::setw(2) << (0xFF & buffer[i]) << (((i + 1) % 16 == 0) ? "\n" : " ");
+	std::cout << std::endl;
+	std::cout.flags(f);
+}
+
+void createInfoFile(const std::string& name, const std::string& ID) 
+{
+	// 1. Create an RSA decryptor. this is done here to generate a new private/public key pair
+	RSAPrivateWrapper rsapriv;
+
+	// 2. get the public key
+	std::string pubkey = rsapriv.getPublicKey();	// you can get it as std::string ...
+
+	char pubkeybuff[RSAPublicWrapper::KEYSIZE];
+	rsapriv.getPublicKey(pubkeybuff, RSAPublicWrapper::KEYSIZE);	// ...or as a char* buffer
+	
+	//hexify(pubkeybuff, RSAPublicWrapper::KEYSIZE);
+	std::ofstream infoFile(INFO_FILE);
+	infoFile << name << std::endl << ID << std::endl << std::hex << pubkey;
 }
 
 int main() 
@@ -147,6 +179,17 @@ int main()
 		ResponseProcessor resp(reply);
 
 		resp.processResponse();
+		if (resp.getCode() == REGISTRATION_SUCCESS) {
+			std::cout << "ID: " << resp.getPayload() << std::endl;
+
+			for (const char& i : std::string(resp.getPayload()))
+				std::cout << std::hex << resp.getPayload();
+		}
+		else  if (resp.getCode() == REGISTRATION_FAIL)
+			std::cerr << "Registration failed" << std::endl;
+		else
+			std::cerr << "Unknown code" << std::endl;
+
 
 		if (resp.getCode() == REGISTRATION_FAIL)
 			return 0;
