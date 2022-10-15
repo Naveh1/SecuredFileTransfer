@@ -1,7 +1,12 @@
 import struct
 from MemoryManager import *
+from Crypto.PublicKey import RSA
+from Crypto.Random import get_random_bytes
+from Crypto.Cipher import AES, PKCS1_OAEP
 
 TOTAL_LEN_WITHOUT_PAYLOAD = 23
+
+AES_KEY_LEN = 16
 
 class Request:
     clientID : str
@@ -68,12 +73,20 @@ class RequestProcessor:
         self.memMngr.signPublicKey(self.req.clientID, name, pkey)
         return pkey
 
+    def genAESKey(self, pkey : str):
+        recipient_key = RSA.importKey(pkey)
+        session_key = get_random_bytes(AES_KEY_LEN)
+
+        cipher_rsa = PKCS1_OAEP.new(recipient_key)
+        enc_session_key = cipher_rsa.encrypt(session_key)
+        return enc_session_key
+
     def procReq(self):
         code = self.req.code
         if code == REGISTRATION:
             return self.regUser()
         elif code == PUBLIC_KEY:
-            return self.signKey()
+            return self.genAESKey(self.signKey())
         elif code == SEND_FILE:
             pass
         elif code == CRC_OK:

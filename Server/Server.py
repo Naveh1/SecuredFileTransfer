@@ -57,7 +57,7 @@ class Server:
                         connection.sendall(respProc.serializeResponse())
                 elif reqProc.getCode() == PUBLIC_KEY:
                     try:
-                        reqProc.procReq()
+                        aesKey = reqProc.procReq()
                     except Exception:
                         print("Error occurred with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
             except Exception as e:

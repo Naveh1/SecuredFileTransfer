@@ -43,3 +43,15 @@ class MemoryManager:
                 self.db.updateUser("PublicKey", key, ID)
         finally:
             self.lock.release()
+
+    def signPublicKey(self, ID : int, key : bytes):
+        try:
+            self.lock.acquire()
+
+            if ID not in self.clients:
+                raise Exception("Client does not exist")
+            else:
+                self.clients[ID].publicKey = key
+                self.db.updateUser("AES_KEY", key, ID)
+        finally:
+            self.lock.release()
