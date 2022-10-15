@@ -44,7 +44,7 @@ class MemoryManager:
         finally:
             self.lock.release()
 
-    def signPublicKey(self, ID : int, key : bytes):
+    def signAESKey(self, ID : int, key : bytes):
         try:
             self.lock.acquire()
 

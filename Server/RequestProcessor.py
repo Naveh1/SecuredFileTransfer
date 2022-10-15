@@ -77,6 +77,8 @@ class RequestProcessor:
         recipient_key = RSA.importKey(pkey)
         session_key = get_random_bytes(AES_KEY_LEN)
 
+        self.memMngr.signAESKey(self.req.clientID, session_key)
+
         cipher_rsa = PKCS1_OAEP.new(recipient_key)
         enc_session_key = cipher_rsa.encrypt(session_key)
         return enc_session_key
