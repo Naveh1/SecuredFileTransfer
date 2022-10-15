@@ -51,7 +51,7 @@ class MemoryManager:
             if ID not in self.clients:
                 raise Exception("Client does not exist")
             else:
-                self.clients[ID].publicKey = key
+                self.clients[ID].AESKey = key
                 self.db.updateUser("AES_KEY", key, ID)
         finally:
             self.lock.release()

@@ -40,9 +40,10 @@ class Server:
 
     def manageClient(self, connection, address):
         print(f"Connection by {address}")
+        bool toContinue = True
         with connection:
+            while True:
             req = connection.recv(1024)
-
             #print(f"request received: {req}")
             try:
                 reqProc : RequestProcessor = RequestProcessor(req, self.memMngr)
@@ -53,11 +54,16 @@ class Server:
                         connection.sendall(respProc.serializeResponse())
                     except Exception as e:
                         respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
-                        print("Pack: " + str(respProc.serializeResponse()))
+                        print("Pack: " + str(respProc.serializeResponse())) # debug
                         connection.sendall(respProc.serializeResponse())
                 elif reqProc.getCode() == PUBLIC_KEY:
                     try:
-                        aesKey = reqProc.procReq()
+                        EncAesKey = reqProc.procReq()
+                        info = (reqProc.req.clientID, EncAesKey)
+                        respProc = ResponseProcessor(VERSION, SEND_AES, len(info[0]) + len(info[1]), info)
+
+                        print("Pack: " + str(respProc.serializeResponse())) # debug
+                        connection.sendall(respProc.serializeResponse())
                     except Exception:
                         print("Error occurred with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
             except Exception as e:

@@ -21,7 +21,7 @@ FILE_PATH_SIZE = 256
 class Client:
     ID : int
     name : str
-    publicKey : RSA.RsaKey
+    publicKey : bytes
     lastSeen : str
     AESKey : bytes
 

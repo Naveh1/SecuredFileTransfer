@@ -26,7 +26,7 @@ class ResponseProcessor:
         elif code == REGISTRATION_SUCCESS:
             self.resp = Response(version, code, payloadSize, info)
         elif code == SEND_AES:
-            payload = info[0].encode('utf-8') + info[1].encode('utf-8')
+            payload = info[0].encode('utf-8') + info[1]
             self.resp = Response(version, code, payloadSize, payload)
 
     def serializeResponse(self) -> bytes:
