@@ -51,13 +51,15 @@ void createInfoFile(const std::string& name, const std::string& ID)
 
 	// 2. get the public key
 	std::string pubkey = rsapriv.getPublicKey();	// you can get it as std::string ...
-
-	char pubkeybuff[RSAPublicWrapper::KEYSIZE];
-	rsapriv.getPublicKey(pubkeybuff, RSAPublicWrapper::KEYSIZE);	// ...or as a char* buffer
 	
 	//hexify(pubkeybuff, RSAPublicWrapper::KEYSIZE);
 	std::ofstream infoFile(INFO_FILE);
-	infoFile << name << std::endl << ID << std::endl << std::hex << pubkey;
+	if (!infoFile)
+	{
+		std::cerr << "Couldn't open/create info file for writing at: " << INFO_FILE << std::endl;
+		exit(0);
+	}
+	infoFile << name << std::endl << ID << std::endl << Base64Wrapper::encode(rsapriv.getPrivateKey());
 }
 
 int main() 
