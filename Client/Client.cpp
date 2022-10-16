@@ -4,14 +4,16 @@
 #include <string>
 #include "RequestProcessor.h"
 #include "ResponseProcessor.h"
-#include <cryptopp/rsa.h>
-
-#define NULLPTR nullptr
-#include "Base64Wrapper.h"
-//#include "RSAWrapper.h"
-#include "AESWrapper.h"
+//#include <cryptopp/rsa.h>
 
 #include <iomanip>
+
+//#define NULLPTR nullptr
+#include "Base64Wrapper.h"
+#include "RSAWrapper.h"
+#include "AESWrapper.h"
+
+
 
 #define RESPONSE_HEAD_LEN 7
 #define REGISTRATION_RESPONSE_PAYLOAD 16
@@ -20,6 +22,7 @@ struct UserData
 {
 	std::string userName;
 	std::string userId;
+	std::string privateKey;
 };
 
 
@@ -38,7 +41,13 @@ using boost::asio::ip::tcp;
 
 #define MAX_REPLY_LEN 1024
 
-enum codes {REGISTRATION = 1100};
+enum codes {REGISTRATION = 1100, SEND_PUBLIC_KEY};
+
+
+bool existsTest(const std::string& name);
+void hexify(const unsigned char* buffer, unsigned int length);
+void createInfoFile(const std::string& name, const std::string& ID);
+UserData registerUser(tcp::socket& s, tcp::resolver& resolver);
 
 bool existsTest(const std::string& name) {
 	std::ifstream f(name.c_str());
@@ -54,7 +63,7 @@ void hexify(const unsigned char* buffer, unsigned int length)
 	std::cout << std::endl;
 	std::cout.flags(f);
 }
-/*
+
 void createInfoFile(const std::string& name, const std::string& ID) 
 {
 	// 1. Create an RSA decryptor. this is done here to generate a new private/public key pair
@@ -72,7 +81,7 @@ void createInfoFile(const std::string& name, const std::string& ID)
 	}
 	infoFile << name << std::endl << ID << std::endl << Base64Wrapper::encode(rsapriv.getPrivateKey());
 }
-*/
+
 UserData registerUser(tcp::socket& s, tcp::resolver& resolver)
 {
 	std::string line, ip, name, file;
@@ -168,19 +177,20 @@ UserData registerUser(tcp::socket& s, tcp::resolver& resolver)
 		for (const char& i : std::string(resp.getPayload()))
 			std::cout << std::hex << resp.getPayload();				//debug
 	}
-	else  if (resp.getCode() == REGISTRATION_FAIL)
+	else  if (resp.getCode() == REGISTRATION_FAIL) {
 		std::cerr << "Registration failed" << std::endl;
+		exit(0);
+	}
 	else
 		std::cerr << "Unknown code" << std::endl;
 
 
-	if (resp.getCode() == REGISTRATION_FAIL)
-	{
-		std::cerr << "Registration failed" << std::endl;
-		exit(0);
-	}
+	return {name, resp.getPayload(), ""};
+}
 
-	return {name, resp.getPayload()};
+void sendKey(const UserData& userData) 
+{
+	
 }
 
 int main() 
@@ -198,7 +208,14 @@ int main()
 	{
 		userData = registerUser(s, resolver);
 
-		//createInfoFile(userData.userName, userData.userId)
+		createInfoFile(userData.userName, userData.userId);
+
+		infoFile = std::ifstream(INFO_FILE);
+		if (!infoFile)
+		{
+			std::cerr << "Error opening information file" << std::endl;
+			return 0;
+		}
 	}
 
 	return 0;
