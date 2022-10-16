@@ -40,37 +40,45 @@ class Server:
 
     def manageClient(self, connection, address):
         print(f"Connection by {address}")
-        bool toContinue = True
+        toContinue : bool = True
         with connection:
-            while True:
-            req = connection.recv(1024)
-            #print(f"request received: {req}")
-            try:
-                reqProc : RequestProcessor = RequestProcessor(req, self.memMngr)
-                if reqProc.getCode() == REGISTRATION:
-                    try:
-                        ID = reqProc.procReq()
-                        respProc = ResponseProcessor(VERSION, REGISTRATION_SUCCESS, ID_SIZE, ID)
-                        connection.sendall(respProc.serializeResponse())
-                    except Exception as e:
-                        respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
-                        print("Pack: " + str(respProc.serializeResponse())) # debug
-                        connection.sendall(respProc.serializeResponse())
-                elif reqProc.getCode() == PUBLIC_KEY:
-                    try:
-                        EncAesKey = reqProc.procReq()
-                        info = (reqProc.req.clientID, EncAesKey)
-                        respProc = ResponseProcessor(VERSION, SEND_AES, len(info[0]) + len(info[1]), info)
+            while toContinue:
+                try:
+                    req = connection.recv(1024)
+                except Exception:
+                    print("Error receiving request")
+                    break
+                #print(f"request received: {req}")
+                try:
+                    reqProc : RequestProcessor = RequestProcessor(req, self.memMngr)
+                    if reqProc.getCode() == REGISTRATION:
+                        try:
+                            ID = reqProc.procReq()
+                            respProc = ResponseProcessor(VERSION, REGISTRATION_SUCCESS, ID_SIZE, ID)
+                            connection.sendall(respProc.serializeResponse())
+                        except Exception as e:
+                            respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
+                            print("Pack: " + str(respProc.serializeResponse())) # debug
 
-                        print("Pack: " + str(respProc.serializeResponse())) # debug
-                        connection.sendall(respProc.serializeResponse())
-                    except Exception:
-                        print("Error occurred with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
-            except Exception as e:
-                import traceback
-                traceback.print_exc()
-                #print(e)
-                #pass #if code 2100 - REGISTRATION FAILED RESPONSE: CODE 2101
+                            connection.sendall(respProc.serializeResponse())
+
+                            print("User error: " + str(e))
+                    elif reqProc.getCode() == PUBLIC_KEY:
+                        try:
+                            EncAesKey = reqProc.procReq()
+                            info = (reqProc.req.clientID, EncAesKey)
+                            respProc = ResponseProcessor(VERSION, SEND_AES, len(info[0]) + len(info[1]), info)
+
+                            print("Pack: " + str(respProc.serializeResponse())) # debug
+                            connection.sendall(respProc.serializeResponse())
+                        except Exception:
+                            print("Error occurred with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+                    #print(e)
+                    #pass #if code 2100 - REGISTRATION FAILED RESPONSE: CODE 2101
+                #toContinue = False
 
 
 def main():
