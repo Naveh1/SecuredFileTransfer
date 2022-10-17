@@ -111,19 +111,21 @@ void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data)
 
 char* request(tcp::socket& s, const std::vector<char>& req)
 {
-	char reply[MAX_REPLY_LEN];
+	char* reply = new char[MAX_REPLY_LEN];
 	size_t reply_len = 0;
 	try {
 		boost::asio::write(s, boost::asio::buffer(req));
 
 		//reply_len = boost::asio::read(s, boost::asio::buffer(reply, MAX_REPLY_LEN));
-		s.read_some(boost::asio::buffer(reply, MAX_REPLY_LEN));
+		reply_len = s.read_some(boost::asio::buffer(reply, MAX_REPLY_LEN));
 
 	}
 	catch (const std::exception& e) {
 		std::cout << e.what() << std::endl;
 		exit(0);
 	}
+
+	return reply;
 }
 
 UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
@@ -141,7 +143,7 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 
 	char* reply = request(s, req.serializeResponse(true));
 
-	std::cout << reply;		//debug
+	//std::cout << std::string(reply) << std::endl;		//debug
 	ResponseProcessor resp(reply);
 
 	resp.processResponse();
@@ -158,6 +160,7 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 	else
 		std::cerr << "Unknown code" << std::endl;
 
+	delete reply;
 
 	return {infoData.name, resp.getPayload(), ""};
 }
@@ -174,6 +177,8 @@ void sendKey(tcp::socket& s, const UserData& userData)
 	ResponseProcessor resp(reply);
 	char aesKey[AES_KEY_LEN];
 	resp.processResponse(aesKey);
+
+	delete reply;
 }
 
 
