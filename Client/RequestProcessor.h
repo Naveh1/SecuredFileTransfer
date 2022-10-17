@@ -25,5 +25,10 @@ private:
 	uint32_t _payloadSize;
 
 	char* _payload;
-
 };
+
+
+std::string padString(const std::string& str, const int len)
+{
+	return str + std::string(len - str.size(), '\0');
+}

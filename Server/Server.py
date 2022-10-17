@@ -79,6 +79,8 @@ class Server:
                     #print(e)
                     #pass #if code 2100 - REGISTRATION FAILED RESPONSE: CODE 2101
                 #toContinue = False
+                import time
+                time.sleep(500)
 
 
 def main():

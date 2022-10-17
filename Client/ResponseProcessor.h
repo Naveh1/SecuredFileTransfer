@@ -4,9 +4,14 @@
 
 
 #define BYTE 8
+
 #define REGISTRATION_SUCCESS 2100
 #define REGISTRATION_FAIL 2101
+#define SENT_AES 2102
 #define RECEIVED_APPROVAL 2104
+
+#define AES_KEY_LEN 16
+
 
 class ResponseProcessor
 {

@@ -2,7 +2,6 @@
 #include "ResponseProcessor.h"
 #include <string>
 
-
 RequestProcessor::RequestProcessor(const uint8_t version, const uint16_t code, const uint32_t payloadSize, const char* payload, const char clientID[CLIENT_ID_LEN]) : _version(version), _code(code), _payloadSize(payloadSize)
 {
 	strncpy_s(_clientID, clientID, CLIENT_ID_LEN);
@@ -24,12 +23,6 @@ std::vector<char> RequestProcessor::serializeResponse(const bool nullTerminator)
     return bytes;
 }
 
-std::string padString(const std::string& str, const int len)
-{
-    //std::string padding(len - str.size(), '\0');
-    //return padding.append(str);
-    return str + std::string(len - str.size(), '\0');
-}
 
 std::string RequestProcessor::responseToString(const bool nullTerminator) const
 {

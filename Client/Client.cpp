@@ -8,12 +8,11 @@
 
 #include <iomanip>
 
-//#define NULLPTR nullptr
 #include "Base64Wrapper.h"
 #include "RSAWrapper.h"
 #include "AESWrapper.h"
 
-
+#define PUBLICKEY_LEN 160
 
 #define RESPONSE_HEAD_LEN 7
 #define REGISTRATION_RESPONSE_PAYLOAD 16
@@ -58,6 +57,9 @@ void hexify(const unsigned char* buffer, unsigned int length);
 void createInfoFile(const std::string& name, const std::string& ID);
 void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data);
 UserData registerUser(tcp::socket& s, const InfoFileData&);
+InfoFileData setupUserData();
+UserData processInfoFile();
+char* request(tcp::socket& s, const std::vector<char>& req);
 
 bool existsTest(const std::string& name) {
 	std::ifstream f(name.c_str());
@@ -108,6 +110,22 @@ void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data)
 	std::cout << "Name: " << data.name << std::endl;		//debug
 }
 
+char* request(tcp::socket& s, const std::vector<char>& req)
+{
+	char reply[MAX_REPLY_LEN];
+	size_t reply_len = 0;
+	try {
+		boost::asio::write(s, boost::asio::buffer(req));
+
+		//reply_len = boost::asio::read(s, boost::asio::buffer(reply, MAX_REPLY_LEN));
+		s.read_some(boost::asio::buffer(reply, MAX_REPLY_LEN));
+
+	}
+	catch (const std::exception& e) {
+		std::cout << e.what() << std::endl;
+		exit(0);
+	}
+}
 
 UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 {
@@ -121,19 +139,8 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 	std::cout << std::endl;*/
 
 	//std::string reply(MAX_REPLY_LEN, '\0');
-	char reply[MAX_REPLY_LEN];
-	size_t reply_len = 0;
-	try {
-		boost::asio::write(s, boost::asio::buffer(req.serializeResponse(true)));
 
-		//reply_len = boost::asio::read(s, boost::asio::buffer(reply, MAX_REPLY_LEN));
-		s.read_some(boost::asio::buffer(reply, MAX_REPLY_LEN));
-
-	}
-	catch (const std::exception& e) {
-		std::cout << e.what() << std::endl;
-		exit(0);
-	}
+	char* reply = request(s, req.serializeResponse(true));
 
 	std::cout << reply;		//debug
 	ResponseProcessor resp(reply);
@@ -156,13 +163,22 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 	return {infoData.name, resp.getPayload(), ""};
 }
 
-void sendKey(const UserData& userData) 
+void sendKey(tcp::socket& s, const UserData& userData)
 {
-	
+	RSAPrivateWrapper pKey(userData.privateKey);
+
+	std::string name = padString(userData.userName, NAME_LEN);
+
+	RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_PUBLIC_KEY, (uint32_t)(NAME_LEN + PUBLICKEY_LEN), (name + pKey.getPublicKey()).c_str(), userData.userId.c_str());
+	char* reply = request(s, req.serializeResponse());
+
+	ResponseProcessor resp(reply);
+	char aesKey[AES_KEY_LEN];
+	resp.processResponse(aesKey);
 }
 
 
-InfoFileData setupServer() 
+InfoFileData setupUserData()
 {
 	std::string line, ip, name, file;
 
@@ -215,36 +231,49 @@ InfoFileData setupServer()
 	return {ip, port, name, file};
 }
 
+
+UserData processInfoFile() 
+{
+	std::string name, id, privateKey;
+	std::ifstream infoFile = std::ifstream(INFO_FILE);
+	if (!infoFile)
+	{
+		std::cerr << "Error opening information file" << std::endl;
+		exit(0);
+	}
+
+	infoFile >> name;
+	infoFile >> std::hex >> id;
+	infoFile >> privateKey;
+
+	return { name, id, Base64Wrapper::decode(privateKey) };
+}
+
 int main() 
 {
-	std::ifstream infoFile(INFO_FILE);
-	//std::string line, ip, name, file;
-	int port;
-
 	boost::asio::io_context io_context;
 	tcp::socket s(io_context);
 	tcp::resolver resolver(io_context);
-	//UserData userData;
-	InfoFileData infoData = setupServer();
+	UserData userData;
+	InfoFileData infoData = setupUserData();
 	
 	//file = setupServer();
 
 	connect(s, resolver, infoData);
 
-	if (!infoFile)
+	//std::ifstream infoFile(INFO_FILE);
+	//if (!infoFile)
+	if(!existsTest(INFO_FILE))
 	{
 		//userData = 
-		UserData userData = registerUser(s, infoData);
+		userData = registerUser(s, infoData);
 
 		createInfoFile(userData.userName, userData.userId);
-
-		infoFile = std::ifstream(INFO_FILE);
-		if (!infoFile)
-		{
-			std::cerr << "Error opening information file" << std::endl;
-			return 0;
-		}
 	}
+
+	userData = processInfoFile();
+
+	sendKey(s, userData);
 
 	return 0;
 }
