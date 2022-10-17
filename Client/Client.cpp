@@ -18,6 +18,15 @@
 #define RESPONSE_HEAD_LEN 7
 #define REGISTRATION_RESPONSE_PAYLOAD 16
 
+struct InfoFileData 
+{
+	std::string ip;
+	int port;
+	std::string name;
+	std::string file;
+};
+
+
 struct UserData 
 {
 	std::string userName;
@@ -47,7 +56,8 @@ enum codes {REGISTRATION = 1100, SEND_PUBLIC_KEY};
 bool existsTest(const std::string& name);
 void hexify(const unsigned char* buffer, unsigned int length);
 void createInfoFile(const std::string& name, const std::string& ID);
-UserData registerUser(tcp::socket& s, tcp::resolver& resolver);
+void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data);
+UserData registerUser(tcp::socket& s, const InfoFileData&);
 
 bool existsTest(const std::string& name) {
 	std::ifstream f(name.c_str());
@@ -82,7 +92,77 @@ void createInfoFile(const std::string& name, const std::string& ID)
 	infoFile << name << std::endl << ID << std::endl << Base64Wrapper::encode(rsapriv.getPrivateKey());
 }
 
-UserData registerUser(tcp::socket& s, tcp::resolver& resolver)
+void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data)
+{
+	Sleep(5000);
+
+	std::cout << "Connecting to " << data.ip << " on port " << std::to_string(data.port) << std::endl;
+
+	try {
+		boost::asio::connect(s, resolver.resolve(data.ip, std::to_string(data.port)));
+	}
+	catch (std::exception& e) {
+		std::cerr << "Error connecting: " << e.what() << std::endl;
+		exit(0);
+	}
+	std::cout << "Name: " << data.name << std::endl;		//debug
+}
+
+
+UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
+{
+
+	//send registration request
+	RequestProcessor req(VERSION, REGISTRATION, NAME_LEN, infoData.name.c_str());
+	/*auto requ = req.serializeResponse(true);
+	std::cout << "len: "  << requ.size() << std::endl;
+	for (char r : requ)
+		std::cout << r;
+	std::cout << std::endl;*/
+
+	//std::string reply(MAX_REPLY_LEN, '\0');
+	char reply[MAX_REPLY_LEN];
+	size_t reply_len = 0;
+	try {
+		boost::asio::write(s, boost::asio::buffer(req.serializeResponse(true)));
+
+		//reply_len = boost::asio::read(s, boost::asio::buffer(reply, MAX_REPLY_LEN));
+		s.read_some(boost::asio::buffer(reply, MAX_REPLY_LEN));
+
+	}
+	catch (const std::exception& e) {
+		std::cout << e.what() << std::endl;
+		exit(0);
+	}
+
+	std::cout << reply;		//debug
+	ResponseProcessor resp(reply);
+
+	resp.processResponse();
+	if (resp.getCode() == REGISTRATION_SUCCESS) {
+		std::cout << "ID: " << resp.getPayload() << std::endl;		//debug
+
+		for (const char& i : std::string(resp.getPayload()))
+			std::cout << std::hex << resp.getPayload();				//debug
+	}
+	else  if (resp.getCode() == REGISTRATION_FAIL) {
+		std::cerr << "Registration failed" << std::endl;
+		exit(0);
+	}
+	else
+		std::cerr << "Unknown code" << std::endl;
+
+
+	return {infoData.name, resp.getPayload(), ""};
+}
+
+void sendKey(const UserData& userData) 
+{
+	
+}
+
+
+InfoFileData setupServer() 
 {
 	std::string line, ip, name, file;
 
@@ -129,84 +209,32 @@ UserData registerUser(tcp::socket& s, tcp::resolver& resolver)
 	/*if (!existsTest(file))
 	{
 		std::cerr << "Error opening file" << std::endl;
-		return 0;
-	}*/
-
-	Sleep(5000);
-
-	std::cout << "Connecting to " << ip << " on port " << std::to_string(port) << std::endl;
-
-	try {
-		boost::asio::connect(s, resolver.resolve(ip, std::to_string(port)));
-	}
-	catch (std::exception& e) {
-		std::cerr << "Error connecting: " << e.what() << std::endl;
 		exit(0);
-	}
-	std::cout << "Name: " << name << std::endl;		//debug
-	//send registration request
-	RequestProcessor req(VERSION, REGISTRATION, NAME_LEN, name.c_str());
-	/*auto requ = req.serializeResponse(true);
-	std::cout << "len: "  << requ.size() << std::endl;
-	for (char r : requ)
-		std::cout << r;
-	std::cout << std::endl;*/
+	}*/ //deleting for debug
 
-	//std::string reply(MAX_REPLY_LEN, '\0');
-	char reply[MAX_REPLY_LEN];
-	size_t reply_len = 0;
-	try {
-		boost::asio::write(s, boost::asio::buffer(req.serializeResponse(true)));
-
-		//reply_len = boost::asio::read(s, boost::asio::buffer(reply, MAX_REPLY_LEN));
-		s.read_some(boost::asio::buffer(reply, MAX_REPLY_LEN));
-
-	}
-	catch (const std::exception& e) {
-		std::cout << e.what() << std::endl;
-		exit(0);
-	}
-
-	std::cout << reply;		//debug
-	ResponseProcessor resp(reply);
-
-	resp.processResponse();
-	if (resp.getCode() == REGISTRATION_SUCCESS) {
-		std::cout << "ID: " << resp.getPayload() << std::endl;		//debug
-
-		for (const char& i : std::string(resp.getPayload()))
-			std::cout << std::hex << resp.getPayload();				//debug
-	}
-	else  if (resp.getCode() == REGISTRATION_FAIL) {
-		std::cerr << "Registration failed" << std::endl;
-		exit(0);
-	}
-	else
-		std::cerr << "Unknown code" << std::endl;
-
-
-	return {name, resp.getPayload(), ""};
-}
-
-void sendKey(const UserData& userData) 
-{
-	
+	return {ip, port, name, file};
 }
 
 int main() 
 {
 	std::ifstream infoFile(INFO_FILE);
-	std::string line, ip, name, file;
+	//std::string line, ip, name, file;
 	int port;
 
 	boost::asio::io_context io_context;
 	tcp::socket s(io_context);
 	tcp::resolver resolver(io_context);
-	UserData userData;
+	//UserData userData;
+	InfoFileData infoData = setupServer();
+	
+	//file = setupServer();
+
+	connect(s, resolver, infoData);
 
 	if (!infoFile)
 	{
-		userData = registerUser(s, resolver);
+		//userData = 
+		UserData userData = registerUser(s, infoData);
 
 		createInfoFile(userData.userName, userData.userId);
 
