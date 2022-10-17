@@ -4,6 +4,8 @@
 #include <vector>
 
 #define CLIENT_ID_LEN 16
+#define NAME_LEN 255
+
 enum lengths { VERSION_LEN = 1, CODE_LEN, PAYLOAD_SIZE = 4 };
 
 class RequestProcessor
@@ -18,6 +20,8 @@ public:
 	template <typename T>
 	static std::string numberToBytes(const T number, const int len);
 
+	static std::string padName(const std::string& name, const int len = NAME_LEN);
+
 private:
 	char _clientID[CLIENT_ID_LEN];
 	uint8_t _version;
@@ -28,7 +32,3 @@ private:
 };
 
 
-std::string padString(const std::string& str, const int len)
-{
-	return str + std::string(len - str.size(), '\0');
-}

@@ -41,7 +41,6 @@ struct UserData
 using boost::asio::ip::tcp;
 
 #define NAME_LEN_IN_FILE 100
-#define NAME_LEN 255
 #define VERSION 3
 
 #define MIN_PORT 1024
@@ -91,7 +90,7 @@ void createInfoFile(const std::string& name, const std::string& ID)
 		std::cerr << "Couldn't open/create info file for writing at: " << INFO_FILE << std::endl;
 		exit(0);
 	}
-	infoFile << name << std::endl << ID << std::endl << Base64Wrapper::encode(rsapriv.getPrivateKey());
+	infoFile << name << std::endl << std::hex << ID << std::endl << Base64Wrapper::encode(rsapriv.getPrivateKey());
 }
 
 void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data)
@@ -167,7 +166,7 @@ void sendKey(tcp::socket& s, const UserData& userData)
 {
 	RSAPrivateWrapper pKey(userData.privateKey);
 
-	std::string name = padString(userData.userName, NAME_LEN);
+	std::string name = RequestProcessor::padName(userData.userName);
 
 	RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_PUBLIC_KEY, (uint32_t)(NAME_LEN + PUBLICKEY_LEN), (name + pKey.getPublicKey()).c_str(), userData.userId.c_str());
 	char* reply = request(s, req.serializeResponse());

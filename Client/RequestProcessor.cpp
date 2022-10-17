@@ -2,6 +2,13 @@
 #include "ResponseProcessor.h"
 #include <string>
 
+
+std::string padString(const std::string& str, const int len)
+{
+    return str + std::string(len - str.size(), '\0');
+}
+
+
 RequestProcessor::RequestProcessor(const uint8_t version, const uint16_t code, const uint32_t payloadSize, const char* payload, const char clientID[CLIENT_ID_LEN]) : _version(version), _code(code), _payloadSize(payloadSize)
 {
 	strncpy_s(_clientID, clientID, CLIENT_ID_LEN);
@@ -47,4 +54,9 @@ std::string RequestProcessor::numberToBytes(const T number, const int len)
     delete[] resChar;
 
     return res;
+}
+
+std::string RequestProcessor::padName(const std::string& name, const int len)
+{
+    return padString(name, len);
 }
