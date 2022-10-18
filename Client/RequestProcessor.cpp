@@ -11,7 +11,7 @@ std::string padString(const std::string& str, const int len)
 
 RequestProcessor::RequestProcessor(const uint8_t version, const uint16_t code, const uint32_t payloadSize, const char* payload, const char clientID[CLIENT_ID_LEN]) : _version(version), _code(code), _payloadSize(payloadSize)
 {
-	strncpy_s(_clientID, clientID, CLIENT_ID_LEN);
+	strncpy_s(_clientID, CLIENT_ID_LEN, clientID, CLIENT_ID_LEN);
 
 	_payload = new char[payloadSize];
 	strncpy_s(_payload, payloadSize, payload, payloadSize);

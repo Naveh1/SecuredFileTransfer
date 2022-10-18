@@ -59,6 +59,7 @@ UserData registerUser(tcp::socket& s, const InfoFileData&);
 InfoFileData setupUserData();
 UserData processInfoFile();
 char* request(tcp::socket& s, const std::vector<char>& req);
+std::string string_to_hex(const std::string& in);
 
 bool existsTest(const std::string& name) {
 	std::ifstream f(name.c_str());
@@ -81,7 +82,7 @@ void createInfoFile(const std::string& name, const std::string& ID)
 	RSAPrivateWrapper rsapriv;
 
 	// 2. get the public key
-	std::string pubkey = rsapriv.getPublicKey();	// you can get it as std::string ...
+	//std::string pubkey = rsapriv.getPublicKey();	// you can get it as std::string ...
 	
 	//hexify(pubkeybuff, RSAPublicWrapper::KEYSIZE);
 	std::ofstream infoFile(INFO_FILE);
@@ -90,7 +91,13 @@ void createInfoFile(const std::string& name, const std::string& ID)
 		std::cerr << "Couldn't open/create info file for writing at: " << INFO_FILE << std::endl;
 		exit(0);
 	}
-	infoFile << name << std::endl << std::hex << ID << std::endl << Base64Wrapper::encode(rsapriv.getPrivateKey());
+	infoFile << name << std::endl;
+	//infoFile << std::hex << ID;
+	//std::cout << std::endl << string_to_hex(ID);
+	infoFile << string_to_hex(ID);
+	//for (const char& a : ID)
+	//	infoFile << std::hex << a;
+	infoFile << std::endl << Base64Wrapper::encode(rsapriv.getPrivateKey());
 }
 
 void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data)
@@ -151,7 +158,7 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 		std::cout << "ID: " << resp.getPayload() << std::endl;		//debug
 
 		for (const char& i : std::string(resp.getPayload()))
-			std::cout << std::hex << resp.getPayload();				//debug
+			std::cout << std::hex << (int)i;				//debug
 	}
 	else  if (resp.getCode() == REGISTRATION_FAIL) {
 		std::cerr << "Registration failed" << std::endl;
@@ -236,9 +243,42 @@ InfoFileData setupUserData()
 }
 
 
+std::string string_to_hex(const std::string& in) {
+	std::stringstream ss;
+
+	ss << std::hex << std::setfill('0');
+	for (size_t i = 0; in.length() > i; ++i) {
+		ss << std::setw(2) << static_cast<unsigned int>(static_cast<unsigned char>(in[i]));
+	}
+
+	return ss.str();
+}
+
+std::string hexToString(const std::string& in) {
+	std::string output;
+
+	if ((in.length() % 2) != 0) {
+		throw std::runtime_error("String is not valid length ...");
+	}
+
+	size_t cnt = in.length() / 2;
+
+	for (size_t i = 0; cnt > i; ++i) {
+		uint32_t s = 0;
+		std::stringstream ss;
+		ss << std::hex << in.substr(i * 2, 2);
+		ss >> s;
+
+		output.push_back(static_cast<unsigned char>(s));
+	}
+
+	return output;
+}
+
 UserData processInfoFile() 
 {
-	std::string name, id, privateKey;
+
+	std::string name, id, privateKey, line;
 	std::ifstream infoFile = std::ifstream(INFO_FILE);
 	if (!infoFile)
 	{
@@ -246,11 +286,14 @@ UserData processInfoFile()
 		exit(0);
 	}
 
-	infoFile >> name;
-	infoFile >> std::hex >> id;
-	infoFile >> privateKey;
+	//infoFile >> name;
+	std::getline(infoFile, name);
+	infoFile >> id;
 
-	return { name, id, Base64Wrapper::decode(privateKey) };
+	while (std::getline(infoFile, line))
+		privateKey += line;
+	//infoFile >> privateKey;
+	return { name, hexToString(id.substr(0, CLIENT_ID_LEN)), Base64Wrapper::decode(privateKey) };
 }
 
 int main() 
