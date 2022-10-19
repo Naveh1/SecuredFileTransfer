@@ -49,13 +49,17 @@ const char* ResponseProcessor::getPayload() const
     return _payload;
 }
 
+uint32_t ResponseProcessor::getPayloadSize() const
+{
+    return _payloadSize;
+}
+
 void ResponseProcessor::processResponse(char* res) const
 {
     switch (_code) 
     {
     case REGISTRATION_SUCCESS:
         std::cout << "Registration succeeded!, id: " << this->_payload << std::endl;
-        res = _payload;
         break;
     case REGISTRATION_FAIL:
         std::cerr << "Registration failed!" << std::endl;

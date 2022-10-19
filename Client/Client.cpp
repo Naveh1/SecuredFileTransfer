@@ -59,7 +59,7 @@ UserData registerUser(tcp::socket& s, const InfoFileData&);
 InfoFileData setupUserData();
 UserData processInfoFile();
 char* request(tcp::socket& s, const std::vector<char>& req);
-std::string string_to_hex(const std::string& in);
+std::string string_to_hex(const std::string& in, const int len);
 
 bool existsTest(const std::string& name) {
 	std::ifstream f(name.c_str());
@@ -74,6 +74,21 @@ void hexify(const unsigned char* buffer, unsigned int length)
 		std::cout << std::setfill('0') << std::setw(2) << (0xFF & buffer[i]) << (((i + 1) % 16 == 0) ? "\n" : " ");
 	std::cout << std::endl;
 	std::cout.flags(f);
+}
+
+
+std::string myHexify(const unsigned char* buffer, unsigned int length)
+{
+	std::stringstream ss;
+	std::ios::fmtflags f(ss.flags());
+	ss << std::hex;
+	for (size_t i = 0; i < length; i++)
+		ss << std::setfill('0') << std::setw(2) << (0xFF & buffer[i]);
+		//ss << std::setfill('0') << std::setw(2) << (0xFF & buffer[i]) << (((i + 1) % 16 == 0) ? "\n" : " ");
+	//ss << std::endl;
+	ss.flags(f);
+
+	return ss.str();
 }
 
 void createInfoFile(const std::string& name, const std::string& ID) 
@@ -94,7 +109,7 @@ void createInfoFile(const std::string& name, const std::string& ID)
 	infoFile << name << std::endl;
 	//infoFile << std::hex << ID;
 	//std::cout << std::endl << string_to_hex(ID);
-	infoFile << string_to_hex(ID);
+	infoFile << string_to_hex(ID, REGISTRATION_RESPONSE_PAYLOAD);
 	//for (const char& a : ID)
 	//	infoFile << std::hex << a;
 	infoFile << std::endl << Base64Wrapper::encode(rsapriv.getPrivateKey());
@@ -158,7 +173,7 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 		std::cout << "ID: " << resp.getPayload() << std::endl;		//debug
 
 		for (const char& i : std::string(resp.getPayload()))
-			std::cout << std::hex << (int)i;				//debug
+			std::cout << std::hex << (uint8_t)i;				//debug
 	}
 	else  if (resp.getCode() == REGISTRATION_FAIL) {
 		std::cerr << "Registration failed" << std::endl;
@@ -249,15 +264,18 @@ InfoFileData setupUserData()
 }
 
 
-std::string string_to_hex(const std::string& in) {
-	std::stringstream ss;
+std::string string_to_hex(const std::string& in, const int len = -1) {
+	//std::stringstream ss;
+	size_t stop = len;
+	if (len == -1)
+		stop = in.length();
+	//for (size_t i = 0; i < stop; ++i) {
+	//	ss << std::setw(2) << static_cast<unsigned int>(static_cast<unsigned char>(in[i]));
+	//}
 
-	ss << std::hex << std::setfill('0');
-	for (size_t i = 0; in.length() > i; ++i) {
-		ss << std::setw(2) << static_cast<unsigned int>(static_cast<unsigned char>(in[i]));
-	}
+	//return ss.str();
 
-	return ss.str();
+	return myHexify((const unsigned char*)in.c_str(), stop);
 }
 
 std::string hexToString(const std::string& in) {

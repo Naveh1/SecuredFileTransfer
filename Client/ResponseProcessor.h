@@ -23,6 +23,7 @@ public:
 
 	uint16_t getCode() const;
 	const char* getPayload() const;
+	uint32_t getPayloadSize() const;
 	
 	void processResponse(char* res = NULL) const;
 

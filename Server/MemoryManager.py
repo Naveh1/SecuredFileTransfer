@@ -34,7 +34,7 @@ class MemoryManager:
         try:
             self.lock.acquire()
 
-            if ID not in self.clients:
+            if ID not in self.clients.keys():
                 raise Exception("Client does not exist")
             elif self.clients[ID].name != name:
                 raise  Exception("Wrong name")
