@@ -14,8 +14,8 @@ public:
 	RequestProcessor(const uint8_t version, const uint16_t code, const uint32_t payloadSize, const char* payload, const char clientID[CLIENT_ID_LEN] = "0");
 	~RequestProcessor();
 
-	std::vector<char> serializeResponse(const bool nullTerminator = false) const;
-	std::string responseToString(const bool nullTerminator = false) const;
+	std::vector<char> serializeResponse() const;
+	std::string responseToString() const;
 
 	template <typename T>
 	static std::string numberToBytes(const T number, const int len);

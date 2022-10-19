@@ -163,7 +163,7 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 
 	//std::string reply(MAX_REPLY_LEN, '\0');
 
-	char* reply = request(s, req.serializeResponse(true));
+	char* reply = request(s, req.serializeResponse());
 
 	//std::cout << std::string(reply) << std::endl;		//debug
 	ResponseProcessor resp(reply);
@@ -278,7 +278,28 @@ std::string string_to_hex(const std::string& in, const int len = -1) {
 	return myHexify((const unsigned char*)in.c_str(), stop);
 }
 
+std::string hexToASCII(const std::string& hex)
+{
+	// initialize the ASCII code string as empty.
+	std::string ascii = "";
+	for (size_t i = 0; i < hex.length(); i += 2)
+	{
+		// extract two characters from hex string
+		std::string part = hex.substr(i, 2);
+
+		// change it into base 16 and
+		// typecast as the character
+		char ch = stoul(part, nullptr, 16);
+
+		// add this char to final ASCII string
+		ascii += ch;
+	}
+	return ascii;
+}
+
+
 std::string hexToString(const std::string& in) {
+	//return hexToASCII(in);
 	std::string output;
 
 	if ((in.length() % 2) != 0) {
@@ -317,7 +338,8 @@ UserData processInfoFile()
 	while (std::getline(infoFile, line))
 		privateKey += line;
 	//infoFile >> privateKey;
-	return { name, hexToString(id.substr(0, CLIENT_ID_LEN)), Base64Wrapper::decode(privateKey) };
+	return { name, hexToString(id), Base64Wrapper::decode(privateKey) };
+	//return { name, hexToString(id.substr(0, CLIENT_ID_LEN * 2)), Base64Wrapper::decode(privateKey) };
 }
 
 int main() 

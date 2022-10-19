@@ -7,7 +7,13 @@ std::string padString(const std::string& str, const int len)
 {
     if (len - str.size() <= 0)
         return str;
-    return str + std::string(len - str.size(), '\0');
+
+    try {
+        return str + std::string(len - str.size(), '\0');
+    }
+    catch (const std::exception& e) {
+        return str;
+    }
 }
 
 
@@ -24,16 +30,16 @@ RequestProcessor::~RequestProcessor()
     delete[] _payload;
 }
 
-std::vector<char> RequestProcessor::serializeResponse(const bool nullTerminator) const
+std::vector<char> RequestProcessor::serializeResponse() const
 {
-    std::string str = responseToString(nullTerminator);
+    std::string str = responseToString();
     std::vector<char> bytes(str.begin(), str.end());
     //bytes.push_back('\0');
     return bytes;
 }
 
 
-std::string RequestProcessor::responseToString(const bool nullTerminator) const
+std::string RequestProcessor::responseToString() const
 {
     //int offset = nullTerminator ? 1 : 0;
     std::string res = padString(std::string(_clientID), CLIENT_ID_LEN) + numberToBytes<uint8_t>(_version, VERSION_LEN);
