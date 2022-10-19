@@ -3,6 +3,7 @@ import _thread
 from MemoryManager import *
 from RequestProcessor import *
 from ResponseProcessor import *
+import traceback
 
 PORT_FILE_NAME = "port.info"
 DEFAULT_PORT = 1234
@@ -72,15 +73,14 @@ class Server:
                             print("Pack: " + str(respProc.serializeResponse())) # debug
                             connection.sendall(respProc.serializeResponse())
                         except Exception:
+                            traceback.print_exc()
                             print("Error occurred with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
                 except Exception as e:
-                    import traceback
+                        
                     traceback.print_exc()
                     #print(e)
                     #pass #if code 2100 - REGISTRATION FAILED RESPONSE: CODE 2101
                 #toContinue = False
-                import time
-                time.sleep(500)
 
 
 def main():

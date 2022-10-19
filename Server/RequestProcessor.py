@@ -19,11 +19,11 @@ class Request:
         try:
             print(req)
             unpacked = struct.unpack("<%dsBHI" % (ID_SIZE), req[:TOTAL_LEN_WITHOUT_PAYLOAD])
-            self.clientID = unpacked[0].decode("utf-8")
+            self.clientID = unpacked[0]
             self.version = unpacked[1]
             self.code = unpacked[2]
             self.payloadSize = unpacked[3]
-
+            print("len: " + str(len(req[TOTAL_LEN_WITHOUT_PAYLOAD:])))
             self.payload = struct.unpack("<%ds" % (self.payloadSize), req[TOTAL_LEN_WITHOUT_PAYLOAD:])[0];
             #self.payload = unpacked[4]
 

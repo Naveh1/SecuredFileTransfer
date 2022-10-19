@@ -175,10 +175,16 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 void sendKey(tcp::socket& s, const UserData& userData)
 {
 	RSAPrivateWrapper pKey(userData.privateKey);
+	//std::cout << "public key size: " << pKey.getPublicKey().size() << std::endl;
+	//std::string name = RequestProcessor::padName(userData.userName);
+	char payload[NAME_LEN + PUBLICKEY_LEN - 1] = { 0 };
+	memcpy(payload, userData.userName.c_str(), userData.userName.size());
+	memcpy(payload + NAME_LEN - 1, pKey.getPublicKey().c_str(), PUBLICKEY_LEN);
+	//std::cout << payload;
+	//std::cout << pKey.getPublicKey();
 
-	std::string name = RequestProcessor::padName(userData.userName);
-
-	RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_PUBLIC_KEY, (uint32_t)(NAME_LEN + PUBLICKEY_LEN), (name + pKey.getPublicKey()).c_str(), userData.userId.c_str());
+	RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_PUBLIC_KEY, (uint32_t)(NAME_LEN + PUBLICKEY_LEN), payload, userData.userId.c_str());
+	//RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_PUBLIC_KEY, (uint32_t)(NAME_LEN + PUBLICKEY_LEN), (name + pKey.getPublicKey()).c_str(), userData.userId.c_str());
 	char* reply = request(s, req.serializeResponse());
 
 	ResponseProcessor resp(reply);

@@ -20,8 +20,6 @@ public:
 	template <typename T>
 	static std::string numberToBytes(const T number, const int len);
 
-	static std::string padName(const std::string& name, const int len = NAME_LEN);
-
 private:
 	char _clientID[CLIENT_ID_LEN];
 	uint8_t _version;
