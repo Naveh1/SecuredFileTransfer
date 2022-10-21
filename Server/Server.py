@@ -58,6 +58,7 @@ class Server:
                             respProc = ResponseProcessor(VERSION, REGISTRATION_SUCCESS, ID_SIZE, ID)
                             connection.sendall(respProc.serializeResponse())
                         except Exception as e:
+                            traceback.print_exc()
                             respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
                             print("Pack: " + str(respProc.serializeResponse())) # debug
 

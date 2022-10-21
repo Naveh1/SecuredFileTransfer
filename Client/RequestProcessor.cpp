@@ -2,6 +2,7 @@
 #include "ResponseProcessor.h"
 #include <string>
 
+#define REG_REQ_CODE 1100
 
 std::string padString(const std::string& str, const int len)
 {
@@ -45,7 +46,11 @@ std::string RequestProcessor::responseToString() const
     std::string res = padString(std::string(_clientID, CLIENT_ID_LEN), CLIENT_ID_LEN) + numberToBytes<uint8_t>(_version, VERSION_LEN);
     res += padString(numberToBytes<uint16_t>(_code, CODE_LEN), CODE_LEN);
     res += padString(numberToBytes<uint32_t>(_payloadSize, PAYLOAD_SIZE), PAYLOAD_SIZE);
-    return res + padString(std::string(_payload, _payloadSize), _payloadSize/* - offset*/);
+
+    if(_code == REG_REQ_CODE)
+        return res + padString(std::string(_payload), _payloadSize/* - offset*/);
+    else
+        return res + padString(std::string(_payload, _payloadSize), _payloadSize/* - offset*/);
 }
 
 

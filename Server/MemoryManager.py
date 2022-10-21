@@ -33,25 +33,27 @@ class MemoryManager:
     def signPublicKey(self, ID : str, name : str, key : bytes):
         try:
             self.lock.acquire()
-
-            if ID not in self.clients.keys():
+            tmpID = ID.hex()
+            print(str(len(name.decode('utf-8'))) + '\t' + name.decode('utf-8'))
+            print(str(len(self.clients[tmpID].name)) + '\t' + self.clients[tmpID].name)
+            if tmpID not in self.clients.keys():
                 raise Exception("Client does not exist")
-            elif self.clients[ID].name != name:
+            elif self.clients[tmpID].name != name.decode('utf-8'): #removing '0' from the end
                 raise  Exception("Wrong name")
             else:
-                self.clients[ID].publicKey = key
-                self.db.updateUser("PublicKey", key, ID)
+                self.clients[tmpID].publicKey = key
+                self.db.updateUser("PublicKey", key, tmpID)
         finally:
             self.lock.release()
 
     def signAESKey(self, ID : str, key : bytes):
         try:
             self.lock.acquire()
-
-            if ID not in self.clients:
+            tmpID = ID.hex()
+            if tmpID not in self.clients.keys():
                 raise Exception("Client does not exist")
             else:
-                self.clients[ID].AESKey = key
-                self.db.updateUser("AES_KEY", key, ID)
+                self.clients[tmpID].AESKey = key
+                self.db.updateUser("AES_KEY", key, tmpID)
         finally:
             self.lock.release()

@@ -67,7 +67,7 @@ class RequestProcessor:
     def signKey(self):
         if self.req.payloadSize != NAME_LEN + PUBLIC_KEY_LEN:
             raise  Exception("Illegal register size")
-        name = self.req.payload.decode('utf-8')[:NAME_LEN]
+        name = self.req.payload[:NAME_LEN]
         pkey = self.req.payload[NAME_LEN:]
 
         self.memMngr.signPublicKey(self.req.clientID, name, pkey)
