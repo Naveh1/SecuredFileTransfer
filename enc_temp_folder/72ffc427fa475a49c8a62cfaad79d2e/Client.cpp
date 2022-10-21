@@ -199,9 +199,9 @@ void sendKey(tcp::socket& s, const UserData& userData)
 	//std::cout << pKey.getPublicKey();
 
 	RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_PUBLIC_KEY, (uint32_t)(NAME_LEN + PUBLICKEY_LEN), payload, userData.userId.c_str());
-	//std::cout << string_to_hex(req.getPayload(), 415);
-	//auto a = req.serializeResponse();
-	//std::cout << std::endl << std::endl << string_to_hex(std::string(a.begin(), a.end()).c_str(), a.size()) << '\t' << a.size() << std::endl;
+	std::cout << string_to_hex(req.getPayload(), 415);
+	auto a = req.serializeResponse();
+	std::cout << std::endl << std::endl << string_to_hex(std::string(a.begin(), a.end()).c_str(), a.size()) << '\t' << a.size() << std::endl;
 	//RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_PUBLIC_KEY, (uint32_t)(NAME_LEN + PUBLICKEY_LEN), (name + pKey.getPublicKey()).c_str(), userData.userId.c_str());
 	char* reply = request(s, req.serializeResponse());
 

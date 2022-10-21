@@ -42,10 +42,10 @@ std::vector<char> RequestProcessor::serializeResponse() const
 std::string RequestProcessor::responseToString() const
 {
     //int offset = nullTerminator ? 1 : 0;
-    std::string res = padString(std::string(_clientID), CLIENT_ID_LEN) + numberToBytes<uint8_t>(_version, VERSION_LEN);
+    std::string res = padString(std::string(_clientID, CLIENT_ID_LEN), CLIENT_ID_LEN) + numberToBytes<uint8_t>(_version, VERSION_LEN);
     res += padString(numberToBytes<uint16_t>(_code, CODE_LEN), CODE_LEN);
     res += padString(numberToBytes<uint32_t>(_payloadSize, PAYLOAD_SIZE), PAYLOAD_SIZE);
-    return res + padString(std::string(_payload), _payloadSize/* - offset*/);
+    return res + padString(std::string(_payload, _payloadSize), _payloadSize/* - offset*/);
 }
 
 

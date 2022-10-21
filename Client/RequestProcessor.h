@@ -20,6 +20,8 @@ public:
 	template <typename T>
 	static std::string numberToBytes(const T number, const int len);
 
+	char* getPayload() const { return _payload; };//debug - DELETE
+
 private:
 	char _clientID[CLIENT_ID_LEN];
 	uint8_t _version;

@@ -19,13 +19,13 @@ FILE_PATH_SIZE = 256
 
 
 class Client:
-    ID : int
+    ID : str
     name : str
     publicKey : bytes
     lastSeen : str
     AESKey : bytes
 
-    def __init__(self, ID : int, name : str, publicKey = b"\0", lastSeen = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") ,AESKey = b"\0") -> None:
+    def __init__(self, ID : str, name : str, publicKey = b"\0", lastSeen = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") ,AESKey = b"\0") -> None:
         self.ID = ID
         self.name = name
         self.publicKey = publicKey
@@ -120,7 +120,7 @@ class dbManager:
     
     def updateUser(self, column : str, value, key):
         cur = self.conn.cursor()
-        cur.execute("UPDATE clients SET %s = ? , LastSeen = datetime('now','localtime')) WHERE ID = ?" % (column), (value, key))
+        cur.execute("UPDATE clients SET %s = ? , LastSeen = datetime('now','localtime') WHERE ID = ?" % (column), (value, key))
         cur.close()
         self.conn.commit()
         self.conn.commit()
