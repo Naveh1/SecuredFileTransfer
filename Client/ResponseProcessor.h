@@ -11,6 +11,7 @@
 #define RECEIVED_APPROVAL 2104
 
 #define AES_KEY_LEN 16
+#define ENC_AES_KEY_LEN 128
 
 
 class ResponseProcessor

@@ -65,7 +65,8 @@ void ResponseProcessor::processResponse(char* res) const
         std::cerr << "Registration failed!" << std::endl;
         break;
     case SENT_AES:
-        strncpy_s(res, AES_KEY_LEN, getPayload() + CLIENT_ID_LEN, AES_KEY_LEN);
+        strncpy_s(res, ENC_AES_KEY_LEN, getPayload() + CLIENT_ID_LEN, ENC_AES_KEY_LEN);
+        break;
     default:
         std::cerr << "Unsupported code: " << _code << std::endl;
     }

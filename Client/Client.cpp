@@ -52,7 +52,6 @@ enum codes {REGISTRATION = 1100, SEND_PUBLIC_KEY};
 
 
 bool existsTest(const std::string& name);
-void hexify(const unsigned char* buffer, unsigned int length);
 void createInfoFile(const std::string& name, const std::string& ID);
 void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data);
 UserData registerUser(tcp::socket& s, const InfoFileData&);
@@ -60,20 +59,13 @@ InfoFileData setupUserData();
 UserData processInfoFile();
 char* request(tcp::socket& s, const std::vector<char>& req);
 std::string string_to_hex(const std::string& in, const int len);
+std::string myHexify(const unsigned char* buffer, unsigned int length);
+char* sendKey(tcp::socket& s, const UserData& userData);
+std::string hexToString(const std::string& in);
 
 bool existsTest(const std::string& name) {
 	std::ifstream f(name.c_str());
 	return f.good();
-}
-
-void hexify(const unsigned char* buffer, unsigned int length)
-{
-	std::ios::fmtflags f(std::cout.flags());
-	std::cout << std::hex;
-	for (size_t i = 0; i < length; i++)
-		std::cout << std::setfill('0') << std::setw(2) << (0xFF & buffer[i]) << (((i + 1) % 16 == 0) ? "\n" : " ");
-	std::cout << std::endl;
-	std::cout.flags(f);
 }
 
 
@@ -90,6 +82,7 @@ std::string myHexify(const unsigned char* buffer, unsigned int length)
 
 	return ss.str();
 }
+
 
 void createInfoFile(const std::string& name, const std::string& ID) 
 {
@@ -115,6 +108,7 @@ void createInfoFile(const std::string& name, const std::string& ID)
 	infoFile << std::endl << Base64Wrapper::encode(rsapriv.getPrivateKey());
 }
 
+
 void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data)
 {
 	Sleep(5000);
@@ -130,6 +124,7 @@ void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data)
 	}
 	std::cout << "Name: " << data.name << std::endl;		//debug
 }
+
 
 char* request(tcp::socket& s, const std::vector<char>& req)
 {
@@ -149,6 +144,7 @@ char* request(tcp::socket& s, const std::vector<char>& req)
 
 	return reply;
 }
+
 
 UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 {
@@ -187,14 +183,15 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 	return {infoData.name, resp.getPayload(), ""};
 }
 
-void sendKey(tcp::socket& s, const UserData& userData)
+
+char* sendKey(tcp::socket& s, const UserData& userData)
 {
 	RSAPrivateWrapper pKey(userData.privateKey);
 	//std::cout << "public key size: " << pKey.getPublicKey().size() << std::endl;
 	//std::string name = RequestProcessor::padName(userData.userName);
-	char payload[NAME_LEN + PUBLICKEY_LEN - 1] = { '\0'};
+	char payload[NAME_LEN + PUBLICKEY_LEN] = { '\0' };
 	memcpy(payload, userData.userName.c_str(), userData.userName.size());
-	memcpy(payload + NAME_LEN - 1, pKey.getPublicKey().c_str(), PUBLICKEY_LEN);
+	memcpy(payload + NAME_LEN, pKey.getPublicKey().c_str(), PUBLICKEY_LEN);
 	//std::cout << payload;
 	//std::cout << pKey.getPublicKey();
 
@@ -207,10 +204,12 @@ void sendKey(tcp::socket& s, const UserData& userData)
 
 
 	ResponseProcessor resp(reply);
-	char aesKey[AES_KEY_LEN];
+	char aesKey[ENC_AES_KEY_LEN];
 	resp.processResponse(aesKey);
 
 	delete reply;
+
+	return aesKey;
 }
 
 
@@ -282,28 +281,9 @@ std::string string_to_hex(const std::string& in, const int len = -1) {
 	return myHexify((const unsigned char*)in.c_str(), stop);
 }
 
-std::string hexToASCII(const std::string& hex)
-{
-	// initialize the ASCII code string as empty.
-	std::string ascii = "";
-	for (size_t i = 0; i < hex.length(); i += 2)
-	{
-		// extract two characters from hex string
-		std::string part = hex.substr(i, 2);
-
-		// change it into base 16 and
-		// typecast as the character
-		char ch = stoul(part, nullptr, 16);
-
-		// add this char to final ASCII string
-		ascii += ch;
-	}
-	return ascii;
-}
 
 
 std::string hexToString(const std::string& in) {
-	//return hexToASCII(in);
 	std::string output;
 
 	if ((in.length() % 2) != 0) {
@@ -323,6 +303,7 @@ std::string hexToString(const std::string& in) {
 
 	return output;
 }
+
 
 UserData processInfoFile() 
 {
@@ -345,6 +326,12 @@ UserData processInfoFile()
 	return { name, hexToString(id), Base64Wrapper::decode(privateKey) };
 	//return { name, hexToString(id.substr(0, CLIENT_ID_LEN * 2)), Base64Wrapper::decode(privateKey) };
 }
+
+char* decAESKey(char* aes)
+{
+	return NULL;
+}
+
 
 int main() 
 {
@@ -370,7 +357,8 @@ int main()
 
 	userData = processInfoFile();
 
-	sendKey(s, userData);
+	char* encAES = sendKey(s, userData);
+
 
 	return 0;
 }
