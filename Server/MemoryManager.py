@@ -33,6 +33,7 @@ class MemoryManager:
             self.lock.release()
     
     def signPublicKey(self, ID : str, name : str, key : bytes):
+        #print("Public key: " + str(key))
         try:
             self.lock.acquire()
             tmpID = ID.hex()

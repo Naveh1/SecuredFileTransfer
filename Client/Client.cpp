@@ -36,7 +36,7 @@ struct UserData
 
 struct passedKey
 {
-	char* privKey;
+	char* key;
 	unsigned int len;
 };
 
@@ -201,8 +201,9 @@ passedKey sendKey(tcp::socket& s, const UserData& userData)
 	memcpy(payload + NAME_LEN, pKey.getPublicKey().c_str(), PUBLICKEY_LEN);
 	//std::cout << payload;
 	//std::cout << pKey.getPublicKey();
+	//std::cout << "Public key: " << string_to_hex(pKey.getPublicKey(), -1) << std::endl;
 
- 	RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_PUBLIC_KEY, (uint32_t)(NAME_LEN + PUBLICKEY_LEN), payload, userData.userId.c_str());
+	RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_PUBLIC_KEY, (uint32_t)(NAME_LEN + PUBLICKEY_LEN), payload, userData.userId.c_str());
 	//std::cout << string_to_hex(req.getPayload(), 415);
 	//auto a = req.serializeResponse();
 	//std::cout << std::endl << std::endl << string_to_hex(std::string(a.begin(), a.end()).c_str(), a.size()) << '\t' << a.size() << std::endl;
@@ -211,10 +212,13 @@ passedKey sendKey(tcp::socket& s, const UserData& userData)
 
 
 	ResponseProcessor resp(reply);
-	char aesKey[ENC_AES_KEY_LEN];
+	char aesKey[ENC_AES_KEY_LEN] = { '\0' };
 	resp.processResponse(aesKey);
 
 	delete reply;
+
+	std::cout << "Enc aesKey: " << string_to_hex(std::string(aesKey, 128), 128) << std::endl;
+	std::cout << "Enc aesKey len: " << aesKey << '\t' << strlen(aesKey) << std::endl;
 
 	return { aesKey,  ENC_AES_KEY_LEN };
 }
@@ -339,7 +343,13 @@ std::string decAESKey(const UserData& userData, const passedKey& key)
 {
 	RSAPrivateWrapper pKey(userData.privateKey);
 	
-	return pKey.decrypt(key.privKey, key.len);
+	try {
+		return pKey.decrypt(key.key, key.len);
+	}
+	catch (const std::exception& e){
+		std::cout << "Decryption error: " << e.what() << std::endl;
+		return "";
+	}
 }
 
 

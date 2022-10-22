@@ -81,6 +81,7 @@ class RequestProcessor:
 
         cipher_rsa = PKCS1_OAEP.new(recipient_key)
         enc_session_key = cipher_rsa.encrypt(session_key)
+        print("enc_session_key: " + str(enc_session_key))
         return enc_session_key
 
     def procReq(self):
