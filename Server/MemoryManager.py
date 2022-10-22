@@ -25,7 +25,9 @@ class MemoryManager:
                     raise Exception("Client already exists")
 
             ID = self.db.insertClient(name)
+            #name = self.db.getClient(ID)
             self.clients[ID] = Client(ID, name)
+            #self.client[ID] = Client(ID, self.db.getClient(ID))
             return ID
         finally:
             self.lock.release()
@@ -36,7 +38,8 @@ class MemoryManager:
             tmpID = ID.hex()
 
             if tmpID not in self.clients.keys():
-                raise Exception("Client does not exist")
+                if len(self.db.getClient(ID)) == 0:
+                    raise Exception("Client does not exist")
             elif self.clients[tmpID].name != name.decode('utf-8'): #removing '0' from the end
                 raise  Exception("Wrong name")
             else:
@@ -50,7 +53,8 @@ class MemoryManager:
             self.lock.acquire()
             tmpID = ID.hex()
             if tmpID not in self.clients.keys():
-                raise Exception("Client does not exist")
+                if len(self.db.getClient(ID)) == 0:
+                    raise Exception("Client does not exist")
             else:
                 self.clients[tmpID].AESKey = key
                 self.db.updateUser("AES_KEY", key, tmpID)

@@ -1,5 +1,6 @@
 import sqlite3
 from sqlite3.dbapi2 import Connection, Date
+from typing import final
 from urllib.request import pathname2url
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
@@ -113,6 +114,7 @@ class dbManager:
         #print("Name: " + str(name))
         cur.execute("SELECT ID from clients WHERE NAME = ?", (name, ))
         ID = bytes.fromhex(cur.fetchall()[0][0])
+
         cur.close()
         self.conn.commit()
 
@@ -124,4 +126,16 @@ class dbManager:
         cur.close()
         self.conn.commit()
         self.conn.commit()
-            
+             
+    def getClient(self, ID) -> str:
+        cur = self.conn.cursor()
+        #print("Name: " + str(name))
+        cur.execute("SELECT Name from clients WHERE ID = ?", (ID.hex(), ))
+
+        try:
+            return cur.fetchall()[0][0]
+        except Exception:
+            return ""
+        finally:
+            cur.close()
+
