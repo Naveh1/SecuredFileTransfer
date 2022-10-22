@@ -34,8 +34,7 @@ class MemoryManager:
         try:
             self.lock.acquire()
             tmpID = ID.hex()
-            print(str(len(name.decode('utf-8'))) + '\t' + name.decode('utf-8'))
-            print(str(len(self.clients[tmpID].name)) + '\t' + self.clients[tmpID].name)
+
             if tmpID not in self.clients.keys():
                 raise Exception("Client does not exist")
             elif self.clients[tmpID].name != name.decode('utf-8'): #removing '0' from the end

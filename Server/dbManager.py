@@ -124,4 +124,4 @@ class dbManager:
         cur.close()
         self.conn.commit()
         self.conn.commit()
-        
+            
