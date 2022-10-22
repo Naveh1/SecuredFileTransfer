@@ -34,6 +34,12 @@ struct UserData
 };
 
 
+struct passedKey
+{
+	char* privKey;
+	unsigned int len;
+};
+
 
 #define INFO_FILE "me.info"
 #define TRANSFER_INFO_FILE "transfer.info"
@@ -60,8 +66,9 @@ UserData processInfoFile();
 char* request(tcp::socket& s, const std::vector<char>& req);
 std::string string_to_hex(const std::string& in, const int len);
 std::string myHexify(const unsigned char* buffer, unsigned int length);
-char* sendKey(tcp::socket& s, const UserData& userData);
+passedKey sendKey(tcp::socket& s, const UserData& userData);
 std::string hexToString(const std::string& in);
+std::string decAESKey(const UserData& userData, const passedKey& key);
 
 bool existsTest(const std::string& name) {
 	std::ifstream f(name.c_str());
@@ -184,7 +191,7 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 }
 
 
-char* sendKey(tcp::socket& s, const UserData& userData)
+passedKey sendKey(tcp::socket& s, const UserData& userData)
 {
 	RSAPrivateWrapper pKey(userData.privateKey);
 	//std::cout << "public key size: " << pKey.getPublicKey().size() << std::endl;
@@ -209,7 +216,7 @@ char* sendKey(tcp::socket& s, const UserData& userData)
 
 	delete reply;
 
-	return aesKey;
+	return { aesKey,  ENC_AES_KEY_LEN };
 }
 
 
@@ -327,9 +334,12 @@ UserData processInfoFile()
 	//return { name, hexToString(id.substr(0, CLIENT_ID_LEN * 2)), Base64Wrapper::decode(privateKey) };
 }
 
-char* decAESKey(char* aes)
+
+std::string decAESKey(const UserData& userData, const passedKey& key)
 {
-	return NULL;
+	RSAPrivateWrapper pKey(userData.privateKey);
+	
+	return pKey.decrypt(key.privKey, key.len);
 }
 
 
@@ -357,7 +367,10 @@ int main()
 
 	userData = processInfoFile();
 
-	char* encAES = sendKey(s, userData);
+	passedKey aesKey = sendKey(s, userData);
+	std::string AESkey = decAESKey(userData, aesKey);
+
+
 
 
 	return 0;

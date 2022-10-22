@@ -45,7 +45,12 @@ class Server:
         with connection:
             while toContinue:
                 try:
+                    print("Receiving...")
                     req = connection.recv(1024)
+                    
+                    if len(req) == 0:
+                        print("Client has disconnected")
+                        break
                 except Exception:
                     print("Error receiving request")
                     break
@@ -71,7 +76,7 @@ class Server:
                             info = (reqProc.req.clientID, EncAesKey)
                             respProc = ResponseProcessor(VERSION, SEND_AES, len(info[0]) + len(info[1]), info)
 
-                            print("Pack: " + str(respProc.serializeResponse())) # debug
+                            print("public key Pack: " + str(respProc.serializeResponse())) # debug
                             connection.sendall(respProc.serializeResponse())
                         except Exception:
                             traceback.print_exc()
