@@ -74,6 +74,7 @@ class RequestProcessor:
         return pkey
 
     def genAESKey(self, pkey : str):
+        #print("Hex: " + pkey.hex())
         recipient_key = RSA.importKey(pkey)
         session_key = get_random_bytes(AES_KEY_LEN)
 
@@ -81,7 +82,7 @@ class RequestProcessor:
 
         cipher_rsa = PKCS1_OAEP.new(recipient_key)
         enc_session_key = cipher_rsa.encrypt(session_key)
-        print("enc_session_key: " + str(enc_session_key))
+        #print("enc_session_key in hex: " + str(enc_session_key.hex()))
         return enc_session_key
 
     def procReq(self):

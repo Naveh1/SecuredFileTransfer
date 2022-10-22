@@ -129,7 +129,6 @@ void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data)
 		std::cerr << "Error connecting: " << e.what() << std::endl;
 		exit(0);
 	}
-	std::cout << "Name: " << data.name << std::endl;		//debug
 }
 
 
@@ -194,6 +193,7 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 passedKey sendKey(tcp::socket& s, const UserData& userData)
 {
 	RSAPrivateWrapper pKey(userData.privateKey);
+	//std::cout << string_to_hex(pKey.getPublicKey(), -1) << std::endl;
 	//std::cout << "public key size: " << pKey.getPublicKey().size() << std::endl;
 	//std::string name = RequestProcessor::padName(userData.userName);
 	char payload[NAME_LEN + PUBLICKEY_LEN] = { '\0' };
@@ -217,10 +217,11 @@ passedKey sendKey(tcp::socket& s, const UserData& userData)
 
 	delete reply;
 
-	std::cout << "Enc aesKey: " << string_to_hex(std::string(aesKey, 128), 128) << std::endl;
-	std::cout << "Enc aesKey len: " << aesKey << '\t' << strlen(aesKey) << std::endl;
-
-	return { aesKey,  ENC_AES_KEY_LEN };
+	//std::cout << "Enc aesKey: " << string_to_hex(std::string(aesKey, 128), 128) << std::endl;
+	//std::cout << "Enc aesKey len: " << aesKey << '\t' << strlen(aesKey) << std::endl;
+	char* aesDynamic = new char[ENC_AES_KEY_LEN];
+	memcpy_s(aesDynamic, ENC_AES_KEY_LEN, aesKey, ENC_AES_KEY_LEN);
+	return { aesDynamic,  ENC_AES_KEY_LEN };
 }
 
 
@@ -369,7 +370,6 @@ int main()
 	//if (!infoFile)
 	if(!existsTest(INFO_FILE))
 	{
-		//userData = 
 		userData = registerUser(s, infoData);
 
 		createInfoFile(userData.userName, userData.userId);
@@ -378,10 +378,12 @@ int main()
 	userData = processInfoFile();
 
 	passedKey aesKey = sendKey(s, userData);
+
 	std::string AESkey = decAESKey(userData, aesKey);
 
+	std::cout << string_to_hex(AESkey, AESkey.size()) << std::endl;
 
-
+	delete aesKey.key;
 
 	return 0;
 }
