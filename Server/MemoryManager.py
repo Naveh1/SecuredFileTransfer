@@ -1,11 +1,15 @@
 from dbManager import *
 import _thread
+import os
+
+SERVER_DIR = "serverFiles"
 
 class MemoryManager:
     db : dbManager
     clients : dict
     files : list
     lock : _thread.LockType
+
     
     def __init__(self) -> None:
         self.db = dbManager()
@@ -15,7 +19,11 @@ class MemoryManager:
         for client in clients:
             self.clients[client.ID] = client
         self.lock = _thread.allocate_lock()
-
+        MemoryManager.createDir()
+    
+    def createDir(path : str = SERVER_DIR):
+        if not os.path.exists(path):
+            os.makedirs(path)
 
     def regUser(self, name : str):
         try:
