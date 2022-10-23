@@ -33,7 +33,7 @@ class Client:
         self.lastSeen = lastSeen
         self.AESKey = AESKey
 
-class file:
+class File:
     ID : int
     FileName : str
     PathName : str
@@ -98,7 +98,7 @@ class dbManager:
         for clientRow in clientsRows:
             clients.append(Client(clientRow[0], clientRow[1], clientRow[2], clientRow[3]))
         for fileRow in filesRows:
-            files.append(file(fileRow[0], fileRow[1], fileRow[2], fileRow[3]))
+            files.append(File(fileRow[0], fileRow[1], fileRow[2], fileRow[3]))
         return clients, files
 
     def insertClient(self, name):
@@ -119,6 +119,14 @@ class dbManager:
         self.conn.commit()
 
         return ID
+
+    def insertFile(self, ID, FileName, FilePath, verified : bool = False):
+        cur = self.conn.cursor()
+        
+        cur.execute("INSERT INTO clients(ID, FileName, FilePath, Verified) VALUES(?, ?, datetime('now','localtime'))", (ID, FileName, FilePath, verified))
+        #print("Name: " + str(name))
+        cur.close()
+        self.conn.commit()
     
     def updateUser(self, column : str, value, key):
         cur = self.conn.cursor()

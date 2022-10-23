@@ -5,6 +5,8 @@ from Crypto.Random import get_random_bytes
 from Crypto.Cipher import AES, PKCS1_OAEP
 
 TOTAL_LEN_WITHOUT_PAYLOAD = 23
+FILE_NAME_LEN = 255
+FILE_PREFIX_LEN = FILE_NAME_LEN + 4 + ID_SIZE
 
 AES_KEY_LEN = 16
 
@@ -84,6 +86,17 @@ class RequestProcessor:
         enc_session_key = cipher_rsa.encrypt(session_key)
         #print("enc_session_key in hex: " + str(enc_session_key.hex()))
         return enc_session_key
+
+    def saveFileRequest(self):
+        if self.req.payloadSize <= FILE_PREFIX_LEN:
+            throw Exception("Illegal file packet size")
+        fileInfo = struct.unpack("<%dsI%ds" % (ID_SIZE, FILE_NAME_LEN), self.req.payload[:FILE_PREFIX_LEN])
+        fileEncContent = struct.unpack("<%ds" % (fileInfo[1]) , self.req.payload[FILE_PREFIX_LEN:])[0]
+
+        cipher = AES.new(key, AES.MODE_EAX)
+        plaintext = cipher.decrypt(ciphertext)
+
+        self.memMngr.saveFile(self.req.clientID, fileInfo[2] , plaintext)
 
     def procReq(self):
         code = self.req.code

@@ -25,6 +25,10 @@ class MemoryManager:
         if not os.path.exists(path):
             os.makedirs(path)
 
+    def writeFile(path : str, content):
+        with open(path, "wb") as f:
+            f.write(content)
+
     def regUser(self, name : str):
         try:
             self.lock.acquire()
@@ -67,5 +71,25 @@ class MemoryManager:
 
             self.clients[tmpID].AESKey = key
             self.db.updateUser("AES_KEY", key, tmpID)
+        finally:
+            self.lock.release()
+
+    def saveFile(self, ID : str, fileName : str, content):
+        try:
+            self.lock.acquire()
+            tmpID = ID.hex()
+            if tmpID not in self.clients.keys():
+                if len(self.db.getClient(ID)) == 0:
+                    raise Exception("Client does not exist")
+
+            MemoryManager.createDir(SERVER_DIR + "/" + tmpID)
+            
+            fullPath = SERVER_DIR + "/" + tmpID + "/" + fileName
+
+            writeFile(fullPath, content)
+            
+            self.db.insertFile(tmpID, fileName, fullPath)
+
+            self.files.append(File(tmpID, fileName, fullPath))
         finally:
             self.lock.release()
