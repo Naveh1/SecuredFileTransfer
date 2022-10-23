@@ -26,7 +26,7 @@ class MemoryManager:
 
             ID = self.db.insertClient(name)
             #name = self.db.getClient(ID)
-            self.clients[ID] = Client(ID, name)
+            self.clients[ID.hex()] = Client(ID.hex(), name)
             #self.client[ID] = Client(ID, self.db.getClient(ID))
             return ID
         finally:
