@@ -1,6 +1,7 @@
 from dbManager import *
 import _thread
 import os
+import binascii
 
 SERVER_DIR = "serverFiles"
 
@@ -73,7 +74,7 @@ class MemoryManager:
             self.db.updateUser("AES_KEY", key, tmpID)
         finally:
             self.lock.release()
-
+    
     def saveFile(self, ID : str, fileName : str, content):
         try:
             self.lock.acquire()
@@ -91,5 +92,7 @@ class MemoryManager:
             self.db.insertFile(tmpID, fileName, fullPath)
 
             self.files.append(File(tmpID, fileName, fullPath))
+
+            return binascii.crc32(content)
         finally:
             self.lock.release()

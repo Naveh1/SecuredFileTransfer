@@ -81,6 +81,18 @@ class Server:
                         except Exception:
                             traceback.print_exc()
                             print("Error occurred with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
+                    elif reqProc.getCode() == SEND_FILE:
+                        try:
+                            payload = reqProc.procReq()
+                            respProc = ResponseProcessor(VERSION, GOT_FILE_WITH_CRC, -1, payload)
+                            connection.sendall(respProc.serializeResponse())
+                        except Exception as e:
+                            traceback.print_exc()
+                            respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
+
+                            connection.sendall(respProc.serializeResponse())
+
+                            print("User error: " + str(e))
                 except Exception as e:
                         
                     traceback.print_exc()

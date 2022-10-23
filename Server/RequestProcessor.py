@@ -93,10 +93,11 @@ class RequestProcessor:
         fileInfo = struct.unpack("<%dsI%ds" % (ID_SIZE, FILE_NAME_LEN), self.req.payload[:FILE_PREFIX_LEN])
         fileEncContent = struct.unpack("<%ds" % (fileInfo[1]) , self.req.payload[FILE_PREFIX_LEN:])[0]
 
-        cipher = AES.new(key, AES.MODE_EAX)
+        cipher = AES.new(key, AES.MODE_CBC)
         plaintext = cipher.decrypt(ciphertext)
 
-        self.memMngr.saveFile(self.req.clientID, fileInfo[2] , plaintext)
+        #return self.memMngr.saveFile(self.req.clientID, fileInfo[2] , plaintext)
+        return (self.req.clientID, fileInfo[1], fileInfo[2], self.memMngr.saveFile(self.req.clientID, fileInfo[2] , plaintext))
 
     def procReq(self):
         code = self.req.code
@@ -105,7 +106,7 @@ class RequestProcessor:
         elif code == PUBLIC_KEY:
             return self.genAESKey(self.signKey())
         elif code == SEND_FILE:
-            pass
+            return self.saveFileRequest()
         elif code == CRC_OK:
             pass
         elif code == CRC_NOT_OK:
