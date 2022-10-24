@@ -102,6 +102,19 @@ class RequestProcessor:
 
         #return self.memMngr.saveFile(self.req.clientID, fileInfo[2] , plaintext)
         return (self.req.clientID, fileInfo[1], fileInfo[2], self.memMngr.saveFile(self.req.clientID, fileInfo[2] , plaintext))
+    
+    def crcRequestPayloadProcessor(payload, payloadSize : int):
+        if payloadSize != ID_SIZE + FILE_NAME_LEN:
+            raise Exception("Illegal crc payload size")
+        return struct.unpack("%ds%ds" % (ID_SIZE, FILE_NAME_LEN), payload)
+    
+    def approveFile(self):
+        ClientID, fileName = RequestProcessor.crcRequestPayloadProcessor(self.req.payload)
+
+        self.memMngr.approveFile(self.req.clientID, fileName)
+
+    def wrongFileCrc(self):
+        ClientID, fileName = RequestProcessor.crcRequestPayloadProcessor(self.req.payload)
 
     def procReq(self):
         code = self.req.code
@@ -112,9 +125,9 @@ class RequestProcessor:
         elif code == SEND_FILE:
             return self.saveFileRequest()
         elif code == CRC_OK:
-            pass
+            self.approveFile()
         elif code == CRC_NOT_OK:
-            pass
+            print("CRC not okay")
         elif code == CRC_ERROR:
             pass
         else:

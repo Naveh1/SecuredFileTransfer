@@ -383,7 +383,7 @@ int main()
 	uint32_t resCrc = 0, times = 0;
 	
 	do {
-		std::cout << "Sending file for the " << times + 1 << "time" << std::endl;
+		std::cout << "Sending file for the " << times + 1 << " time." << std::endl;
 		resCrc = sendFile(s, userData, infoData.file, encContent);
 	} while (resCrc != crc && ++times < FILE_SENDING_TIMES);
 

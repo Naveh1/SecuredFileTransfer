@@ -71,7 +71,7 @@ class dbManager:
         FilePath CHAR( %d ) NOT NULL,
         Verified BOOLEAN,
         
-        PRIMARY KEY(ID, FileName, FilePath),
+        PRIMARY KEY(ID, FileName),
         FOREIGN KEY(ID) REFERENCES clients(ID)
         );""" %  (ID_SIZE, FILE_NAME_SIZE, FILE_PATH_SIZE)
 
@@ -147,3 +147,14 @@ class dbManager:
         finally:
             cur.close()
 
+    def validateFile(self, ID, fileName):
+        cur = self.conn.cursor()
+        #print("Name: " + str(name))
+        cur.execute("UPDATE clients SET Verified = True WHERE ID = ? AND FileName = ?", (ID.hex(), fileName))
+        cur.close()
+
+    def removeFile(self, ID, fileName):
+        cur = self.conn.cursor()
+        #print("Name: " + str(name))
+        cur.execute("DELETE FROM Customers WHERE ID = ? AND FileName = ?", (ID.hex(), fileName))
+        cur.close()

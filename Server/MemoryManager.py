@@ -32,6 +32,9 @@ class MemoryManager:
         with open(path, "wb") as f:
             f.write(content)
 
+    def deleteFile(path : str, content):
+        os.remove(path)
+
     def regUser(self, name : str):
         try:
             self.lock.acquire()
@@ -100,5 +103,51 @@ class MemoryManager:
             crcVal.update(content)
             return crcVal.digest()
             #return binascii.crc32(content)
+        finally:
+            self.lock.release()
+
+    def approveFile(self, ID : str, fileName : str):
+        try:
+            self.lock.acquire()
+            tmpID = ID.hex()
+            if tmpID not in self.clients.keys():
+                if len(self.db.getClient(ID)) == 0:
+                    raise Exception("Client does not exist")
+            
+            fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + bytes.fromhex(fileName.hex().rstrip('00')).decode("utf-8")
+            found = False
+            for f in self.files:
+                if f.ID == tmpID and f.FileName == fileName:
+                    f.Verified = True
+                    found = True
+                    break
+            if not found:
+                raise Exception("File doesn't exist")
+
+            self.db.validateFile(ID, fileName)
+        finally:
+            self.lock.release()
+
+    def approveFile(self, ID : str, fileName : str):
+        try:
+            self.lock.acquire()
+            tmpID = ID.hex()
+            if tmpID not in self.clients.keys():
+                if len(self.db.getClient(ID)) == 0:
+                    raise Exception("Client does not exist")
+            
+            fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + bytes.fromhex(fileName.hex().rstrip('00')).decode("utf-8")
+            found = False
+            for f in self.files:
+                if f.ID == tmpID and f.FileName == fileName:
+                    f.Verified = True
+                    found = True
+                    break
+            if not found:
+                raise Exception("File doesn't exist")
+
+            MemoryManager.deleteFile(fullPath)
+
+            self.db.removeFile(ID, fileName)
         finally:
             self.lock.release()
