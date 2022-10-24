@@ -54,7 +54,7 @@ uint32_t ResponseProcessor::getPayloadSize() const
     return _payloadSize;
 }
 
-void ResponseProcessor::processResponse(char* res) const
+void ResponseProcessor::processResponse(void* res) const
 {
     switch (_code) 
     {
@@ -66,6 +66,9 @@ void ResponseProcessor::processResponse(char* res) const
         break;
     case SENT_AES:
         memcpy_s(res, ENC_AES_KEY_LEN, getPayload() + CLIENT_ID_LEN, ENC_AES_KEY_LEN);
+        break;
+    case GOT_FILE_WITH_CRC:
+        *((uint32_t*)res) = deserialize<uint32_t>(getPayload() + CLIENT_ID_LEN + CONTENT_SIZE_SIZE + FILE_NAME_LEN);
         break;
     default:
         std::cerr << "Unsupported code: " << _code << std::endl;

@@ -1,7 +1,7 @@
 from dbManager import *
 import _thread
 import os
-import binascii
+import crc
 
 SERVER_DIR = "serverFiles"
 
@@ -95,6 +95,8 @@ class MemoryManager:
 
             self.files.append(File(tmpID, fileName, fullPath))
 
-            return binascii.crc32(content)
+            crcVal : crc.crc32 =  crc.crc32().update(content)
+            return crcVal.digest()
+            #return binascii.crc32(content)
         finally:
             self.lock.release()

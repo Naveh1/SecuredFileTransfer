@@ -21,6 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="crc.py" />
     <Compile Include="dbManager.py">
       <SubType>Code</SubType>
     </Compile>

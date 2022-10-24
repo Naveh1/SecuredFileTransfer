@@ -154,6 +154,7 @@
     <ClCompile Include="AESWrapper.cpp" />
     <ClCompile Include="Base64Wrapper.cpp" />
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="crc.cpp" />
     <ClCompile Include="RequestProcessor.cpp" />
     <ClCompile Include="ResponseProcessor.cpp" />
     <ClCompile Include="RSAWrapper.cpp" />
@@ -164,6 +165,7 @@
   <ItemGroup>
     <ClInclude Include="AESWrapper.h" />
     <ClInclude Include="Base64Wrapper.h" />
+    <ClInclude Include="crc.h" />
     <ClInclude Include="RequestProcessor.h" />
     <ClInclude Include="ResponseProcessor.h" />
     <ClInclude Include="RSAWrapper.h" />

@@ -4,10 +4,12 @@
 
 
 #define BYTE 8
+#define CONTENT_SIZE_SIZE 4
 
 #define REGISTRATION_SUCCESS 2100
 #define REGISTRATION_FAIL 2101
 #define SENT_AES 2102
+#define GOT_FILE_WITH_CRC 2103
 #define RECEIVED_APPROVAL 2104
 
 #define AES_KEY_LEN 16
@@ -26,7 +28,7 @@ public:
 	const char* getPayload() const;
 	uint32_t getPayloadSize() const;
 	
-	void processResponse(char* res = NULL) const;
+	void processResponse(void* res = NULL) const;
 
 private:
 	uint8_t _version;

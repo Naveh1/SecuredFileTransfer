@@ -4,6 +4,7 @@
 #include <string>
 #include "RequestProcessor.h"
 #include "ResponseProcessor.h"
+#include "crc.h"
 //#include <cryptopp/rsa.h>
 
 #include <iomanip>
@@ -16,6 +17,8 @@
 
 #define RESPONSE_HEAD_LEN 7
 #define REGISTRATION_RESPONSE_PAYLOAD 16
+
+#define FILE_SENDING_TIMES 3
 
 struct InfoFileData 
 {
@@ -70,6 +73,10 @@ std::string myHexify(const unsigned char* buffer, unsigned int length);
 passedKey sendKey(tcp::socket& s, const UserData& userData);
 std::string hexToString(const std::string& in);
 std::string decAESKey(const UserData& userData, const passedKey& key);
+std::string decAESKey(const UserData& userData, const passedKey& key);
+std::string encAES(const std::string& key, const std::string& content);
+uint32_t sendFile(tcp::socket& s, const UserData& userData, const std::string& fileName, const std::string& encFileContent);
+
 
 bool existsTest(const std::string& name) {
 	std::ifstream f(name.c_str());
@@ -380,7 +387,7 @@ std::string encAES(const std::string& key, const std::string& content)
 }
 
 
-void sendFile(tcp::socket& s, const UserData& userData, const std::string& fileName, const std::string& encFileContent)
+uint32_t sendFile(tcp::socket& s, const UserData& userData, const std::string& fileName, const std::string& encFileContent)
 {
 	//SEND_FILE
 	char* payload = RequestProcessor::getFilePayload(userData.userId.c_str(), fileName, encFileContent);
@@ -390,6 +397,13 @@ void sendFile(tcp::socket& s, const UserData& userData, const std::string& fileN
 	char* reply = request(s, req.serializeResponse());
 
 	delete payload;
+
+	ResponseProcessor resp(reply);
+	uint32_t crc = 0;
+
+	resp.processResponse(&crc);
+
+	return crc;
 }
 
 
@@ -422,10 +436,25 @@ int main()
 
 	std::cout << string_to_hex(AESkey, AESkey.size()) << std::endl;
 
-	std::string encContent = encAES(AESkey, getFileContent(infoData.file));
+	std::string content = getFileContent(infoData.file);
 
+	CRC crcCalc = CRC();
+	crcCalc.update((unsigned char*)content.c_str(), content.size());
+	uint32_t crc = crcCalc.digest();
 
+	std::string encContent = encAES(AESkey, content);
 
+	uint32_t resCrc = 0, times = 0;
+	
+	do {
+		resCrc = sendFile(s, userData, infoData.file, encContent);
+	} while (resCrc != crc && ++times < FILE_SENDING_TIMES);
+
+	if (resCrc == crc)
+		std::cout << "CRC_OK packet" << std::endl;
+	else
+		std::cout << "ABORT message packet" << std::endl;
+	
 	delete aesKey.key;
 
 	return 0;
