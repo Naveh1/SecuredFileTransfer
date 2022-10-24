@@ -165,6 +165,7 @@
   <ItemGroup>
     <ClInclude Include="AESWrapper.h" />
     <ClInclude Include="Base64Wrapper.h" />
+    <ClInclude Include="Client.h" />
     <ClInclude Include="crc.h" />
     <ClInclude Include="RequestProcessor.h" />
     <ClInclude Include="ResponseProcessor.h" />
