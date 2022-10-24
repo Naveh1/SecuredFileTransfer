@@ -91,10 +91,14 @@ class RequestProcessor:
         if self.req.payloadSize <= FILE_PREFIX_LEN:
             raise Exception("Illegal file packet size")
         fileInfo = struct.unpack("<%dsI%ds" % (ID_SIZE, FILE_NAME_LEN), self.req.payload[:FILE_PREFIX_LEN])
+        print(self.req.payload[FILE_PREFIX_LEN:])
+        print(str(len(self.req.payload[FILE_PREFIX_LEN:])) + '\t' + str(fileInfo[1]))
         fileEncContent = struct.unpack("<%ds" % (fileInfo[1]) , self.req.payload[FILE_PREFIX_LEN:])[0]
 
+        key = self.memMngr.clients[self.req.clientID.hex()].AESKey
+
         cipher = AES.new(key, AES.MODE_CBC)
-        plaintext = cipher.decrypt(ciphertext)
+        plaintext = cipher.decrypt(fileEncContent)
 
         #return self.memMngr.saveFile(self.req.clientID, fileInfo[2] , plaintext)
         return (self.req.clientID, fileInfo[1], fileInfo[2], self.memMngr.saveFile(self.req.clientID, fileInfo[2] , plaintext))

@@ -327,7 +327,7 @@ uint32_t sendFile(tcp::socket& s, const UserData& userData, const std::string& f
 {
 	//SEND_FILE
 	char* payload = RequestProcessor::getFilePayload(userData.userId.c_str(), fileName, encFileContent);
-	RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_FILE, (uint32_t)(CLIENT_ID_LEN + fileName.size()
+	RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_FILE, (uint32_t)(CLIENT_ID_LEN + CONTENT_SIZE_SIZE
 		+ FILE_NAME_LEN + encFileContent.size()), payload, userData.userId.c_str());
 
 	char* reply = request(s, req.serializeResponse());

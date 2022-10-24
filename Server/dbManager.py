@@ -123,7 +123,7 @@ class dbManager:
     def insertFile(self, ID, FileName, FilePath, verified : bool = False):
         cur = self.conn.cursor()
         
-        cur.execute("INSERT INTO clients(ID, FileName, FilePath, Verified) VALUES(?, ?, datetime('now','localtime'))", (ID, FileName, FilePath, verified))
+        cur.execute("INSERT INTO files(ID, FileName, FilePath, Verified) VALUES(?, ?, ?, ?)", (ID, FileName, FilePath, verified))
         #print("Name: " + str(name))
         cur.close()
         self.conn.commit()

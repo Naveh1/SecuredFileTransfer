@@ -87,9 +87,10 @@ class MemoryManager:
 
             MemoryManager.createDir(SERVER_DIR + "/" + tmpID)
             
-            fullPath = SERVER_DIR + "/" + tmpID + "/" + fileName
+            fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + bytes.fromhex(fileName.hex().rstrip('00')).decode("utf-8")
+            #fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + str(fileName)
 
-            writeFile(fullPath, content)
+            MemoryManager.writeFile(fullPath, content)
             
             self.db.insertFile(tmpID, fileName, fullPath)
 
