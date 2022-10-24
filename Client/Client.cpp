@@ -54,7 +54,8 @@ using boost::asio::ip::tcp;
 
 #define MAX_REPLY_LEN 1024
 
-enum codes {REGISTRATION = 1100, SEND_PUBLIC_KEY};
+
+enum codes {REGISTRATION = 1100, SEND_PUBLIC_KEY, SEND_FILE = 1103};
 
 
 bool existsTest(const std::string& name);
@@ -354,6 +355,44 @@ std::string decAESKey(const UserData& userData, const passedKey& key)
 }
 
 
+std::string getFileContent(const std::string& path)
+{
+	std::ifstream file(path, std::ios::in | std::ios::binary);
+
+	if (!file) {
+		std::cerr << "Error reading file" << std::endl;
+		exit(0);
+	}
+
+	std::string data;
+
+	std::getline(file, data, '\0');
+
+	return data;
+}
+
+
+std::string encAES(const std::string& key, const std::string& content)
+{
+	AESWrapper eKey((unsigned char*)key.c_str(), key.size());
+
+	return eKey.encrypt(content.c_str(), content.size());
+}
+
+
+void sendFile(tcp::socket& s, const UserData& userData, const std::string& fileName, const std::string& encFileContent)
+{
+	//SEND_FILE
+	char* payload = RequestProcessor::getFilePayload(userData.userId.c_str(), fileName, encFileContent);
+	RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_FILE, (uint32_t)(CLIENT_ID_LEN + fileName.size()
+		+ FILE_NAME_LEN + encFileContent.size()), payload, userData.userId.c_str());
+
+	char* reply = request(s, req.serializeResponse());
+
+	delete payload;
+}
+
+
 int main() 
 {
 	boost::asio::io_context io_context;
@@ -382,6 +421,10 @@ int main()
 	std::string AESkey = decAESKey(userData, aesKey);
 
 	std::cout << string_to_hex(AESkey, AESkey.size()) << std::endl;
+
+	std::string encContent = encAES(AESkey, getFileContent(infoData.file));
+
+
 
 	delete aesKey.key;
 

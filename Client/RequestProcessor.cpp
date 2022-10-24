@@ -68,3 +68,16 @@ std::string RequestProcessor::numberToBytes(const T number, const int len)
 
     return res;
 }
+
+
+char* RequestProcessor::getFilePayload(const char* ID, const std::string& fileName, const std::string& fileContent)
+{
+    std::string res = padString(std::string(ID, CLIENT_ID_LEN), CLIENT_ID_LEN) + numberToBytes<uint32_t>(fileContent.size(), VERSION_LEN);
+    res += padString(fileName, FILE_NAME_LEN) + fileContent;
+
+    char* tmp = new char[res.size()];
+
+    memcpy_s(tmp, res.size(), res.c_str(), res.size());
+
+    return tmp;
+}

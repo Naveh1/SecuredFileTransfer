@@ -25,6 +25,8 @@ class MemoryManager:
     def createDir(path : str = SERVER_DIR):
         if not os.path.exists(path):
             os.makedirs(path)
+        else:
+            throw Exception("File already exists: " + path)
 
     def writeFile(path : str, content):
         with open(path, "wb") as f:

@@ -5,6 +5,8 @@
 
 #define CLIENT_ID_LEN 16
 #define NAME_LEN 255
+#define FILE_NAME_LEN 255
+
 
 enum lengths { VERSION_LEN = 1, CODE_LEN, PAYLOAD_SIZE = 4 };
 
@@ -20,8 +22,9 @@ public:
 	template <typename T>
 	static std::string numberToBytes(const T number, const int len);
 
-	char* getPayload() const { return _payload; };//debug - DELETE
+	char* getPayload() const { return _payload; };
 
+	static char* getFilePayload(const char* ID, const std::string& fileName, const std::string& fileContent);
 private:
 	char _clientID[CLIENT_ID_LEN];
 	uint8_t _version;
