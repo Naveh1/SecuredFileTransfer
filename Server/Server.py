@@ -88,11 +88,8 @@ class Server:
                             connection.sendall(respProc.serializeResponse())
                         except Exception as e:
                             traceback.print_exc()
-                            respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
-
-                            connection.sendall(respProc.serializeResponse())
-
                             print("User error: " + str(e))
+                            break
                 except Exception as e:
                         
                     traceback.print_exc()

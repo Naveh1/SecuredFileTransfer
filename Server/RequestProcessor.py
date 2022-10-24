@@ -89,7 +89,7 @@ class RequestProcessor:
 
     def saveFileRequest(self):
         if self.req.payloadSize <= FILE_PREFIX_LEN:
-            throw Exception("Illegal file packet size")
+            raise Exception("Illegal file packet size")
         fileInfo = struct.unpack("<%dsI%ds" % (ID_SIZE, FILE_NAME_LEN), self.req.payload[:FILE_PREFIX_LEN])
         fileEncContent = struct.unpack("<%ds" % (fileInfo[1]) , self.req.payload[FILE_PREFIX_LEN:])[0]
 
