@@ -34,7 +34,7 @@ class ResponseProcessor:
             payload = info[0] + info[1]
             self.resp = Response(version, code, payloadSize, payload)
         elif code == GOT_FILE_WITH_CRC:
-            self.resp = Response(version, code, FILE_RECEIVED_PACK_SIZE, struct.pack("<%dsI%dsI" % (ID_SIZE, FILE_NAME_LEN)))
+            self.resp = Response(version, code, FILE_RECEIVED_PACK_SIZE, struct.pack("<%dsI%dsI" % (ID_SIZE, FILE_NAME_LEN), info[0], info[1], info[2], info[3]))
 
     def serializeResponse(self) -> bytes:
         if self.resp.code == REGISTRATION_FAIL or self.resp.code == RECEIVED_APPROVAL:

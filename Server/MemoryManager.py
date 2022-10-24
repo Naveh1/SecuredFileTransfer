@@ -96,7 +96,8 @@ class MemoryManager:
 
             self.files.append(File(tmpID, fileName, fullPath))
 
-            crcVal : crc.crc32 =  crc.crc32().update(content)
+            crcVal : crc.crc32 = crc.crc32()
+            crcVal.update(content)
             return crcVal.digest()
             #return binascii.crc32(content)
         finally:
