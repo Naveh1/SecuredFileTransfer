@@ -10,7 +10,7 @@ DEFAULT_PORT = 1234
 LOCAL_HOST = "127.0.0.1"
 
 VERSION = 3
-
+TIMES = 4
 class Server:
     host : str
     port : int
@@ -39,78 +39,80 @@ class Server:
                 print('Connected to: ' + address[0] + ':' + str(address[1]))
                 _thread.start_new_thread(self.manageClient, (Client, address))
 
-    def processManagingClient(self, req, expectedReq, repeats = 0):
+    def processManagingClient(self, connection, req, expectedReq = REGISTRATION, repeats = 0):
         doRepeat = True
         reqProc : RequestProcessor = RequestProcessor(req, self.memMngr)
-            if reqProc.getCode() == REGISTRATION:
-                if expectedReq != REGISTRATION:
-                    raise Exception("Unexpected registration")
-                try:
-                    ID = reqProc.procReq()
-                    respProc = ResponseProcessor(VERSION, REGISTRATION_SUCCESS, ID_SIZE, ID)
-                    connection.sendall(respProc.serializeResponse())
-                    expectedReq = PUBLIC_KEY
-                except Exception as e:
-                    traceback.print_exc()
-                    respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
-                    print("Pack: " + str(respProc.serializeResponse())) # debug
+        if reqProc.getCode() == REGISTRATION:
+            if expectedReq != REGISTRATION:
+                raise Exception("Unexpected registration")
+            try:
+                ID = reqProc.procReq()
+                respProc = ResponseProcessor(VERSION, REGISTRATION_SUCCESS, ID_SIZE, ID)
+                connection.sendall(respProc.serializeResponse())
+                expectedReq = PUBLIC_KEY
+            except Exception as e:
+                traceback.print_exc()
+                respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
+                print("Pack: " + str(respProc.serializeResponse())) # debug
 
-                    connection.sendall(respProc.serializeResponse())
+                connection.sendall(respProc.serializeResponse())
 
-                    print("User error: " + str(e))
-            elif reqProc.getCode() == PUBLIC_KEY:
-                if expectedReq != REGISTRATION and expectedReq != PUBLIC_KEY:
-                    raise Exception("Unexpected sending of public key")
-                try:
-                    EncAesKey = reqProc.procReq()
-                    info = (reqProc.req.clientID, EncAesKey)
-                    respProc = ResponseProcessor(VERSION, SEND_AES, len(info[0]) + len(info[1]), info)
+                print("User error: " + str(e))
+        elif reqProc.getCode() == PUBLIC_KEY:
+            if expectedReq != REGISTRATION and expectedReq != PUBLIC_KEY:
+                raise Exception("Unexpected sending of public key")
+            try:
+                EncAesKey = reqProc.procReq()
+                info = (reqProc.req.clientID, EncAesKey)
+                respProc = ResponseProcessor(VERSION, SEND_AES, len(info[0]) + len(info[1]), info)
 
-                    print("public key Pack: " + str(respProc.serializeResponse())) # debug
-                    connection.sendall(respProc.serializeResponse())
+                print("public key Pack: " + str(respProc.serializeResponse())) # debug
+                connection.sendall(respProc.serializeResponse())
 
-                    expectedReq = SEND_FILE
-                except Exception:
-                    traceback.print_exc()
-                    print("Error occurred with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
-            elif reqProc.getCode() == SEND_FILE:
-                if expectedReq != SEND_FILE:
-                    raise Exception("Unexpected sending of file")
-                elif repeats >= TIMES:
-                    raise Exception("Too many resends!")
-                try:
-                    payload = reqProc.procReq()
-                    respProc = ResponseProcessor(VERSION, GOT_FILE_WITH_CRC, -1, payload)
-                    connection.sendall(respProc.serializeResponse())
-                    repeats += 1
-                    expectedReq = CRC_OK
-                except Exception as e:
-                    traceback.print_exc()
-                    print("User error: " + str(e))
-                    doRepeat = False
-            elif reqProc.getCode() == CRC_OK or reqProc.getCode() == CRC_NOT_OK or reqProc.getCode() == CRC_ERROR:
-                if expectedReq != CRC_OK:
-                    raise Exception("Unexpected sending of file")
-                elif reqProc.getCode() == CRC_OK or reqProc.getCode() == CRC_ERROR:
-                    doRepeat = False
-                elif repeats >= TIMES:
-                    raise Exception("Resending too many times")
-                else:
-                    repeats += 1
-                    
-                try:
-                    reqProc.procReq()
-                    respProc = ResponseProcessor(VERSION, RECEIVED_APPROVAL)
-                    connection.sendall(respProc.serializeResponse())
-                except Exception as e:
-                    traceback.print_exc()
-                    print("Crc error: " + str(e))
-                    doRepeat = False
-            return doRepeat, expectedReq, repeats
+                expectedReq = SEND_FILE
+            except Exception:
+                traceback.print_exc()
+                print("Error occurred with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
+        elif reqProc.getCode() == SEND_FILE:
+            if expectedReq != SEND_FILE:
+                raise Exception("Unexpected sending of file")
+            elif repeats >= TIMES:
+                raise Exception("Too many resends!")
+            try:
+                payload = reqProc.procReq()
+                respProc = ResponseProcessor(VERSION, GOT_FILE_WITH_CRC, -1, payload)
+                connection.sendall(respProc.serializeResponse())
+                repeats += 1
+                expectedReq = CRC_OK
+            except Exception as e:
+                traceback.print_exc()
+                print("User error: " + str(e))
+                doRepeat = False
+        elif reqProc.getCode() == CRC_OK or reqProc.getCode() == CRC_NOT_OK or reqProc.getCode() == CRC_ERROR:
+            if expectedReq != CRC_OK:
+                raise Exception("Unexpected sending of file")
+            elif reqProc.getCode() == CRC_OK or reqProc.getCode() == CRC_ERROR:
+                doRepeat = False
+            elif repeats >= TIMES:
+                raise Exception("Resending too many times")
+            else:
+                repeats += 1
+                
+            try:
+                reqProc.procReq()
+                respProc = ResponseProcessor(VERSION, RECEIVED_APPROVAL)
+                connection.sendall(respProc.serializeResponse())
+            except Exception as e:
+                traceback.print_exc()
+                print("Crc error: " + str(e))
+                doRepeat = False
+        return doRepeat, expectedReq, repeats
 
     def manageClient(self, connection, address):
         print(f"Connection by {address}")
         toContinue : bool = True
+        expectedReq = REGISTRATION
+        repeats = 0
         with connection:
             while toContinue:
                 try:
@@ -124,42 +126,9 @@ class Server:
                     print("Error receiving request")
                     break
                 #print(f"request received: {req}")
-                
+
                 try:
-                    reqProc : RequestProcessor = RequestProcessor(req, self.memMngr)
-                    if reqProc.getCode() == REGISTRATION:
-                        try:
-                            ID = reqProc.procReq()
-                            respProc = ResponseProcessor(VERSION, REGISTRATION_SUCCESS, ID_SIZE, ID)
-                            connection.sendall(respProc.serializeResponse())
-                        except Exception as e:
-                            traceback.print_exc()
-                            respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
-                            print("Pack: " + str(respProc.serializeResponse())) # debug
-
-                            connection.sendall(respProc.serializeResponse())
-
-                            print("User error: " + str(e))
-                    elif reqProc.getCode() == PUBLIC_KEY:
-                        try:
-                            EncAesKey = reqProc.procReq()
-                            info = (reqProc.req.clientID, EncAesKey)
-                            respProc = ResponseProcessor(VERSION, SEND_AES, len(info[0]) + len(info[1]), info)
-
-                            print("public key Pack: " + str(respProc.serializeResponse())) # debug
-                            connection.sendall(respProc.serializeResponse())
-                        except Exception:
-                            traceback.print_exc()
-                            print("Error occurred with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
-                    elif reqProc.getCode() == SEND_FILE:
-                        try:
-                            payload = reqProc.procReq()
-                            respProc = ResponseProcessor(VERSION, GOT_FILE_WITH_CRC, -1, payload)
-                            connection.sendall(respProc.serializeResponse())
-                        except Exception as e:
-                            traceback.print_exc()
-                            print("User error: " + str(e))
-                            break
+                    toContinue, expectedReq, repeats =  self.processManagingClient(connection, req, expectedReq, repeats)
                 except Exception as e:  
                     traceback.print_exc()
                     #print(e)
