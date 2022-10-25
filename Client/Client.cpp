@@ -342,6 +342,24 @@ uint32_t sendFile(tcp::socket& s, const UserData& userData, const std::string& f
 	return crc;
 }
 
+bool crcReq(tcp::socket& s, const UserData& userData, const std::string& fileName, const uint16_t code)
+{
+	char* payload = RequestProcessor::getCrcPayload(userData.userId.c_str(), fileName);
+	RequestProcessor req((uint8_t)VERSION, (uint16_t)code, (uint32_t)(CLIENT_ID_LEN + FILE_NAME_LEN), payload, userData.userId.c_str());
+
+	char* reply = request(s, req.serializeResponse());
+
+	delete payload;
+
+	ResponseProcessor resp(reply);
+	if (resp.getCode() != RECEIVED_APPROVAL) {
+		std::cerr << "Wrong response" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
 
 int main() 
 {
@@ -382,16 +400,29 @@ int main()
 
 	uint32_t resCrc = 0, times = 0;
 	
-	do {
+	resCrc = sendFile(s, userData, infoData.file, encContent);
+
+	while (resCrc != crc && ++times < FILE_SENDING_TIMES) 
+	{
+		if (!crcReq(s, userData, infoData.file, CRC_NOT_OK))
+		{
+			delete aesKey.key;
+			return 0;
+		}
 		std::cout << "Sending file for the " << times + 1 << " time." << std::endl;
 		resCrc = sendFile(s, userData, infoData.file, encContent);
-	} while (resCrc != crc && ++times < FILE_SENDING_TIMES);
+	}
 
+	uint16_t code = CRC_OK;
 	if (resCrc == crc)
 		std::cout << "CRC_OK packet" << std::endl;
 	else
-		std::cout << "ABORT message packet" << std::endl;
-	
+	{
+		std::cerr << "crc was wrong too many times. ABORT message packet" << std::endl;
+		code = CRC_ERROR;
+	}
+
+	crcReq(s, userData, infoData.file, CRC_NOT_OK);
 	delete aesKey.key;
 
 	return 0;

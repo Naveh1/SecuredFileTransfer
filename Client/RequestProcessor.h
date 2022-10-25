@@ -25,6 +25,7 @@ public:
 	char* getPayload() const { return _payload; };
 
 	static char* getFilePayload(const char* ID, const std::string& fileName, const std::string& fileContent);
+	static char* getCrcPayload(const char* ID, const std::string& fileName);
 private:
 	char _clientID[CLIENT_ID_LEN];
 	uint8_t _version;

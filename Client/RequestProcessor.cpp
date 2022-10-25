@@ -82,3 +82,14 @@ char* RequestProcessor::getFilePayload(const char* ID, const std::string& fileNa
     return tmp;
 }
 
+
+char* RequestProcessor::getCrcPayload(const char* ID, const std::string& fileName)
+{
+    std::string res = padString(std::string(ID, CLIENT_ID_LEN), CLIENT_ID_LEN) + padString(fileName, FILE_NAME_LEN);
+
+    char* tmp = new char[res.size()];
+
+    memcpy_s(tmp, res.size(), res.c_str(), res.size());
+
+    return tmp;
+}

@@ -88,16 +88,23 @@ class MemoryManager:
                 if len(self.db.getClient(ID)) == 0:
                     raise Exception("Client does not exist")
 
+            found = False
+            for f in self.files:
+                if f.ID == tmpID and f.FileName == fileName:
+                    if f.Verified:
+                        raise Exception("File already exists")
+                    found = True
+                    break
+
             MemoryManager.createDir(SERVER_DIR + "/" + tmpID)
             
             fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + bytes.fromhex(fileName.hex().rstrip('00')).decode("utf-8")
             #fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + str(fileName)
 
             MemoryManager.writeFile(fullPath, content)
-            
-            self.db.insertFile(tmpID, fileName, fullPath)
-
-            self.files.append(File(tmpID, fileName, fullPath))
+            if not found:
+                self.db.insertFile(tmpID, fileName, fullPath)
+                self.files.append(File(tmpID, fileName, fullPath))
 
             crcVal : crc.crc32 = crc.crc32()
             crcVal.update(content)

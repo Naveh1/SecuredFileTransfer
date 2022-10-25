@@ -22,7 +22,7 @@
 
 #define MAX_REPLY_LEN 1024
 
-enum codes { REGISTRATION = 1100, SEND_PUBLIC_KEY, SEND_FILE = 1103 };
+enum codes { REGISTRATION = 1100, SEND_PUBLIC_KEY, SEND_FILE = 1103, CRC_OK = 1104, CRC_NOT_OK = 1105, CRC_ERROR = 1106 };
 
 using boost::asio::ip::tcp;
 
@@ -65,3 +65,4 @@ std::string decAESKey(const UserData& userData, const passedKey& key);
 std::string decAESKey(const UserData& userData, const passedKey& key);
 std::string encAES(const std::string& key, const std::string& content);
 uint32_t sendFile(tcp::socket& s, const UserData& userData, const std::string& fileName, const std::string& encFileContent);
+bool crcReq(tcp::socket& s, const UserData& userData, const std::string& fileName, const uint16_t code);
