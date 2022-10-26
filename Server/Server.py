@@ -90,13 +90,13 @@ class Server:
                 doRepeat = False
         elif reqProc.getCode() == CRC_OK or reqProc.getCode() == CRC_NOT_OK or reqProc.getCode() == CRC_ERROR:
             if expectedReq != CRC_OK:
-                raise Exception("Unexpected sending of file")
+                raise Exception("Unexpected sending of crc")
             elif reqProc.getCode() == CRC_OK or reqProc.getCode() == CRC_ERROR:
                 doRepeat = False
             elif repeats >= TIMES:
                 raise Exception("Resending too many times")
             else:
-                repeats += 1
+                expectedReq = SEND_FILE
                 
             try:
                 reqProc.procReq()

@@ -35,9 +35,9 @@ class Client:
 
 class File:
     ID : int
-    FileName : str
-    PathName : str
-    Verified : bool
+    fileName : str
+    pathName : str
+    verified : bool
 
     def __init__(self, id : int, fileName : str, pathName : str, verified : bool = False) ->None:
         self.ID = id

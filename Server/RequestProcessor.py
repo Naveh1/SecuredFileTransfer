@@ -116,6 +116,9 @@ class RequestProcessor:
     def wrongFileCrc(self):
         ClientID, fileName = RequestProcessor.crcRequestPayloadProcessor(self.req.payload)
 
+        self.memMngr.removeFile(self.req.clientID, fileName)
+
+
     def procReq(self):
         code = self.req.code
         if code == REGISTRATION:
@@ -129,6 +132,6 @@ class RequestProcessor:
         elif code == CRC_NOT_OK:
             print("CRC not okay")
         elif code == CRC_ERROR:
-            pass
+            self.wrongFileCrc()
         else:
             raise Exception("Invalid code")

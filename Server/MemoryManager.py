@@ -87,18 +87,20 @@ class MemoryManager:
             if tmpID not in self.clients.keys():
                 if len(self.db.getClient(ID)) == 0:
                     raise Exception("Client does not exist")
+            
+            fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + str(len(self.files))
 
             found = False
             for f in self.files:
-                if f.ID == tmpID and f.FileName == fileName:
-                    if f.Verified:
+                if f.ID == tmpID and f.fileName == fileName:
+                    if f.verified:
                         raise Exception("File already exists")
                     found = True
                     break
 
             MemoryManager.createDir(SERVER_DIR + "/" + tmpID)
             
-            fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + bytes.fromhex(fileName.hex().rstrip('00')).decode("utf-8")
+            #fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + bytes.fromhex(fileName.hex().rstrip('00')).decode("utf-8")
             #fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + str(fileName)
 
             MemoryManager.writeFile(fullPath, content)
@@ -121,11 +123,10 @@ class MemoryManager:
                 if len(self.db.getClient(ID)) == 0:
                     raise Exception("Client does not exist")
             
-            fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + bytes.fromhex(fileName.hex().rstrip('00')).decode("utf-8")
             found = False
             for f in self.files:
-                if f.ID == tmpID and f.FileName == fileName:
-                    f.Verified = True
+                if f.ID == tmpID and f.fileName == fileName:
+                    f.verified = True
                     found = True
                     break
             if not found:
@@ -135,7 +136,7 @@ class MemoryManager:
         finally:
             self.lock.release()
 
-    def approveFile(self, ID : str, fileName : str):
+    def removeFile(self, ID : str, fileName : str):
         try:
             self.lock.acquire()
             tmpID = ID.hex()
@@ -143,12 +144,13 @@ class MemoryManager:
                 if len(self.db.getClient(ID)) == 0:
                     raise Exception("Client does not exist")
             
-            fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + bytes.fromhex(fileName.hex().rstrip('00')).decode("utf-8")
+            fullPath = str()
             found = False
             for f in self.files:
                 if f.ID == tmpID and f.FileName == fileName:
                     f.Verified = True
                     found = True
+                    fullPath = f.pathName
                     break
             if not found:
                 raise Exception("File doesn't exist")
