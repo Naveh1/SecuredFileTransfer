@@ -97,8 +97,8 @@ class MemoryManager:
                         raise Exception("File already exists")
                     found = True
                     break
-
-            MemoryManager.createDir(SERVER_DIR + "/" + tmpID)
+            if not found:
+                MemoryManager.createDir(SERVER_DIR + "/" + tmpID)
             
             #fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + bytes.fromhex(fileName.hex().rstrip('00')).decode("utf-8")
             #fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + str(fileName)

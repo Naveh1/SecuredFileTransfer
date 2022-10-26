@@ -242,8 +242,10 @@ std::string string_to_hex(const std::string& in, const int len = -1) {
 std::string hexToString(const std::string& in) {
 	std::string output;
 
-	if ((in.length() % 2) != 0) {
-		throw std::runtime_error("String is not valid length ...");
+	if ((in.length() % 2) != 0 || !isHex(in)) {
+		//throw std::runtime_error("String is not valid length ...");
+		std::cerr << "Invalid hex string" << std::endl;
+		exit(0);
 	}
 
 	size_t cnt = in.length() / 2;
@@ -276,6 +278,12 @@ UserData processInfoFile()
 	std::getline(infoFile, name);
 	infoFile >> id;
 
+	if (id.size() != CLIENT_ID_LEN * HEX_FACTOR || !isHex(id))
+	{
+		std::cerr << "Illegal id in info file" << std::endl;
+		exit(0);
+	}
+
 	while (std::getline(infoFile, line))
 		privateKey += line;
 	//infoFile >> privateKey;
@@ -300,16 +308,19 @@ std::string decAESKey(const UserData& userData, const passedKey& key)
 
 std::string getFileContent(const std::string& path)
 {
-	std::ifstream file(path, std::ios::in | std::ios::binary);
+	std::ifstream file(path, std::ios::binary);
 
 	if (!file) {
 		std::cerr << "Error reading file" << std::endl;
 		exit(0);
 	}
 
-	std::string data;
+	//std::string data;
+	//  std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
-	std::getline(file, data, '\0');
+	//  std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+	std::string data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
 	return data;
 }
@@ -360,6 +371,14 @@ bool crcReq(tcp::socket& s, const UserData& userData, const std::string& fileNam
 	return true;
 }
 
+bool isHex(const std::string& str)
+{
+	for (auto& a : str)
+		if (!std::isxdigit(a))
+			return false;
+	return true;
+}
+
 
 int main() 
 {
@@ -404,6 +423,7 @@ int main()
 
 	while (resCrc != crc && ++times <= FILE_SENDING_TIMES) 
 	{
+		std::cout << crc << "\t---\t" << resCrc;
 		if (!crcReq(s, userData, infoData.file, CRC_NOT_OK))
 		{
 			delete aesKey.key;

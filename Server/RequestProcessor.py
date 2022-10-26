@@ -9,7 +9,7 @@ FILE_NAME_LEN = 255
 FILE_PREFIX_LEN = FILE_NAME_LEN + 4 + ID_SIZE
 
 AES_KEY_LEN = 16
-
+import traceback
 class Request:
     clientID : str
     version : int
@@ -38,6 +38,7 @@ class Request:
             if self.payloadSize != len(self.payload):
                 raise  Exception("Unreliable payload size")
         except Exception as e:
+            traceback.print_exc()
             raise  Exception("Bad request")
 
 REGISTRATION = 1100
