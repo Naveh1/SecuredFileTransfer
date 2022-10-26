@@ -32,7 +32,7 @@ class MemoryManager:
         with open(path, "wb") as f:
             f.write(content)
 
-    def deleteFile(path : str, content):
+    def deleteFile(path : str):
         os.remove(path)
 
     def regUser(self, name : str):
@@ -147,8 +147,7 @@ class MemoryManager:
             fullPath = str()
             found = False
             for f in self.files:
-                if f.ID == tmpID and f.FileName == fileName:
-                    f.Verified = True
+                if f.ID == tmpID and f.fileName == fileName:
                     found = True
                     fullPath = f.pathName
                     break

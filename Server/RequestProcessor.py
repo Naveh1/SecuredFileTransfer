@@ -114,7 +114,7 @@ class RequestProcessor:
         self.memMngr.approveFile(self.req.clientID, fileName)
 
     def wrongFileCrc(self):
-        ClientID, fileName = RequestProcessor.crcRequestPayloadProcessor(self.req.payload)
+        ClientID, fileName = RequestProcessor.crcRequestPayloadProcessor(self.req.payload, self.req.payloadSize)
 
         self.memMngr.removeFile(self.req.clientID, fileName)
 

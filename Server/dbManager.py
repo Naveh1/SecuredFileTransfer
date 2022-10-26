@@ -156,5 +156,5 @@ class dbManager:
     def removeFile(self, ID, fileName):
         cur = self.conn.cursor()
         #print("Name: " + str(name))
-        cur.execute("DELETE FROM Customers WHERE ID = ? AND FileName = ?", (ID.hex(), fileName))
+        cur.execute("DELETE FROM files WHERE ID = ? AND FileName = ?", (ID.hex(), fileName))
         cur.close()

@@ -402,7 +402,7 @@ int main()
 	
 	resCrc = sendFile(s, userData, infoData.file, encContent);
 
-	while (resCrc != crc && ++times < FILE_SENDING_TIMES) 
+	while (resCrc != crc && ++times <= FILE_SENDING_TIMES) 
 	{
 		if (!crcReq(s, userData, infoData.file, CRC_NOT_OK))
 		{
@@ -422,7 +422,7 @@ int main()
 		code = CRC_ERROR;
 	}
 
-	crcReq(s, userData, infoData.file, CRC_NOT_OK);
+	crcReq(s, userData, infoData.file, code);
 	delete aesKey.key;
 
 	return 0;
