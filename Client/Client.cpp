@@ -116,10 +116,10 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 
 	resp.processResponse();
 	if (resp.getCode() == REGISTRATION_SUCCESS) {
-		std::cout << "ID: " << resp.getPayload() << std::endl;		//debug
-
-		for (const char& i : std::string(resp.getPayload()))
-			std::cout << std::hex << (uint8_t)i;				//debug
+		//std::cout << "ID: " << resp.getPayload() << std::endl;		//debug
+		std::cout << "";
+		//for (const char& i : std::string(resp.getPayload()))
+		//	std::cout << std::hex << (uint8_t)i;				//debug
 	}
 	else  if (resp.getCode() == REGISTRATION_FAIL) {
 		std::cerr << "Registration failed" << std::endl;
@@ -213,11 +213,11 @@ InfoFileData setupUserData()
 	//getting file name
 	getline(infoFile, file);
 
-	/*if (!existsTest(file))
+	if (!existsTest(file))
 	{
 		std::cerr << "Error opening file" << std::endl;
 		exit(0);
-	}*/ //deleting for debug
+	}
 
 	return {ip, port, name, file};
 }
@@ -407,7 +407,7 @@ int main()
 
 	std::string AESkey = decAESKey(userData, aesKey);
 
-	std::cout << string_to_hex(AESkey, AESkey.size()) << std::endl;
+	//std::cout << string_to_hex(AESkey, AESkey.size()) << std::endl;
 
 	std::string content = getFileContent(infoData.file);
 
@@ -419,13 +419,13 @@ int main()
 	//encContent = content; // debug
 	uint32_t resCrc = 0, times = 0;
 
-	std::cout << string_to_hex(encContent) << std::endl;
+	//std::cout << string_to_hex(encContent) << std::endl;
 	
 	resCrc = sendFile(s, userData, infoData.file, encContent);
 
 	while (resCrc != crc && ++times <= FILE_SENDING_TIMES) 
 	{
-		std::cout << crc << "\t---\t" << resCrc << std::endl;
+		//std::cout << crc << "\t---\t" << resCrc << std::endl;
 		if (!crcReq(s, userData, infoData.file, CRC_NOT_OK))
 		{
 			delete aesKey.key;

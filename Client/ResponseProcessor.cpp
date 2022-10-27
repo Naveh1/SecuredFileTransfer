@@ -59,7 +59,7 @@ void ResponseProcessor::processResponse(void* res) const
     switch (_code) 
     {
     case REGISTRATION_SUCCESS:
-        std::cout << "Registration succeeded!, id: " << this->_payload << std::endl;
+        std::cout << "Registration succeeded!" << std::endl;
         break;
     case REGISTRATION_FAIL:
         std::cerr << "Registration failed!" << std::endl;

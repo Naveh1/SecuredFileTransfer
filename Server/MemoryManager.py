@@ -35,6 +35,9 @@ class MemoryManager:
     def deleteFile(path : str):
         os.remove(path)
 
+    def existsFile(path):
+        return os.path.exists(path) 
+
     def regUser(self, name : str):
         try:
             self.lock.acquire()
@@ -87,8 +90,13 @@ class MemoryManager:
             if tmpID not in self.clients.keys():
                 if len(self.db.getClient(ID)) == 0:
                     raise Exception("Client does not exist")
-            
-            fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + str(len(self.files))
+            count = len(self.files)
+            currFile = str(count)
+            fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + currFile
+            while MemoryManager.existsFile(fullPath):
+                count += 1
+                currFile = str(count)
+                fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + currFile
 
             found = False
             for f in self.files:

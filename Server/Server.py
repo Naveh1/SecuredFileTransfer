@@ -66,11 +66,11 @@ class Server:
             except Exception as e:
                 traceback.print_exc()
                 respProc = ResponseProcessor(VERSION, REGISTRATION_FAIL)
-                print("Pack: " + str(respProc.serializeResponse())) # debug
+                #print("Pack: " + str(respProc.serializeResponse())) # debug
 
                 connection.sendall(respProc.serializeResponse())
 
-                print("User error: " + str(e))
+                #print("User error: " + str(e))
         elif reqProc.getCode() == PUBLIC_KEY:
             if expectedReq != REGISTRATION and expectedReq != PUBLIC_KEY:
                 raise Exception("Unexpected sending of public key")
@@ -79,13 +79,13 @@ class Server:
                 info = (reqProc.req.clientID, EncAesKey)
                 respProc = ResponseProcessor(VERSION, SEND_AES, len(info[0]) + len(info[1]), info)
 
-                print("public key Pack: " + str(respProc.serializeResponse())) # debug
+                #print("public key Pack: " + str(respProc.serializeResponse())) # debug
                 connection.sendall(respProc.serializeResponse())
 
                 expectedReq = SEND_FILE
             except Exception:
                 traceback.print_exc()
-                print("Error occurred with no response specification") #I DONT KNOW WHAT SHOULD I DO HERE 
+                print("Error occurred with no response specification") 
         elif reqProc.getCode() == SEND_FILE:
             if expectedReq != SEND_FILE:
                 raise Exception("Unexpected sending of file")
