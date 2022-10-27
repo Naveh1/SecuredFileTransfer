@@ -150,7 +150,7 @@ class dbManager:
     def validateFile(self, ID, fileName):
         cur = self.conn.cursor()
         #print("Name: " + str(name))
-        cur.execute("UPDATE clients SET Verified = True WHERE ID = ? AND FileName = ?", (ID.hex(), fileName))
+        cur.execute("UPDATE files SET Verified = True WHERE ID = ? AND FileName = ?", (ID.hex(), fileName))
         cur.close()
 
     def removeFile(self, ID, fileName):

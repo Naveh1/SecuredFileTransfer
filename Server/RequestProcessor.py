@@ -3,12 +3,16 @@ from MemoryManager import *
 from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 from Crypto.Cipher import AES, PKCS1_OAEP
+from Crypto.Util.Padding import unpad
 
 TOTAL_LEN_WITHOUT_PAYLOAD = 23
 FILE_NAME_LEN = 255
 FILE_PREFIX_LEN = FILE_NAME_LEN + 4 + ID_SIZE
 
+IV_LEN = 16
+BLOCK_SIZE = 16
 AES_KEY_LEN = 16
+
 import traceback
 class Request:
     clientID : str
@@ -85,6 +89,7 @@ class RequestProcessor:
 
         cipher_rsa = PKCS1_OAEP.new(recipient_key)
         enc_session_key = cipher_rsa.encrypt(session_key)
+        #enc_session_key = cipher_rsa.encrypt(session_key)
         #print("enc_session_key in hex: " + str(enc_session_key.hex()))
         return enc_session_key
 
@@ -98,8 +103,10 @@ class RequestProcessor:
 
         key = self.memMngr.clients[self.req.clientID.hex()].AESKey
 
-        cipher = AES.new(key, AES.MODE_CBC)
-        plaintext = cipher.decrypt(fileEncContent)
+        cipher = AES.new(key, AES.MODE_CBC, b'\x00' * IV_LEN)
+        plaintext = unpad(cipher.decrypt(fileEncContent), BLOCK_SIZE)
+        #plaintext = fileEncContent # debug
+        print(plaintext)
 
         #return self.memMngr.saveFile(self.req.clientID, fileInfo[2] , plaintext)
         return (self.req.clientID, fileInfo[1], fileInfo[2], self.memMngr.saveFile(self.req.clientID, fileInfo[2] , plaintext))
@@ -108,9 +115,10 @@ class RequestProcessor:
         if payloadSize != ID_SIZE + FILE_NAME_LEN:
             raise Exception("Illegal crc payload size")
         return struct.unpack("%ds%ds" % (ID_SIZE, FILE_NAME_LEN), payload)
+        return struct.unpack("%ds%ds" % (ID_SIZE, FILE_NAME_LEN), payload)
     
     def approveFile(self):
-        ClientID, fileName = RequestProcessor.crcRequestPayloadProcessor(self.req.payload)
+        ClientID, fileName = RequestProcessor.crcRequestPayloadProcessor(self.req.payload, self.req.payloadSize)
 
         self.memMngr.approveFile(self.req.clientID, fileName)
 

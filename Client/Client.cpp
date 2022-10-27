@@ -416,14 +416,16 @@ int main()
 	uint32_t crc = crcCalc.digest();
 
 	std::string encContent = encAES(AESkey, content);
-
+	//encContent = content; // debug
 	uint32_t resCrc = 0, times = 0;
+
+	std::cout << string_to_hex(encContent) << std::endl;
 	
 	resCrc = sendFile(s, userData, infoData.file, encContent);
 
 	while (resCrc != crc && ++times <= FILE_SENDING_TIMES) 
 	{
-		std::cout << crc << "\t---\t" << resCrc;
+		std::cout << crc << "\t---\t" << resCrc << std::endl;
 		if (!crcReq(s, userData, infoData.file, CRC_NOT_OK))
 		{
 			delete aesKey.key;
