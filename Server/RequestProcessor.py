@@ -24,13 +24,14 @@ class Request:
     def __init__(self, req : bytes) -> None:
         try:
             print(req)
-            unpacked = struct.unpack("<%dsBHI" % (ID_SIZE), req[:TOTAL_LEN_WITHOUT_PAYLOAD])
+            unpacked = struct.unpack("<%dsBHI" % (ID_SIZE), req)
             self.clientID = unpacked[0]
             self.version = unpacked[1]
             self.code = unpacked[2]
             self.payloadSize = unpacked[3]
-            print("len: " + str(len(req[TOTAL_LEN_WITHOUT_PAYLOAD:])))
-            self.payload = struct.unpack("<%ds" % (self.payloadSize), req[TOTAL_LEN_WITHOUT_PAYLOAD:])[0];
+            self.payload = ""
+            #print("len: " + str(len(req[TOTAL_LEN_WITHOUT_PAYLOAD:])))
+            #self.payload = struct.unpack("<%ds" % (self.payloadSize), req[TOTAL_LEN_WITHOUT_PAYLOAD:])[0]
             #self.payload = unpacked[4]
 
             #print("Debug:")
@@ -39,11 +40,16 @@ class Request:
             #print("Code: " + str(self.code))
             #print("PayloadSize: " + str(self.payloadSize))
             #print("Payload: " + str(self.payload))
-            if self.payloadSize != len(self.payload):
-                raise  Exception("Unreliable payload size")
+            #if self.payloadSize != len(self.payload):
+            #    raise  Exception("Unreliable payload size")
         except Exception as e:
             traceback.print_exc()
-            raise  Exception("Bad request")
+            raise Exception("Bad request")
+
+    def setPayload(self, req : bytes):
+        self.payload = struct.unpack("<%ds" % (self.payloadSize), req)[0]
+        if self.payloadSize != len(self.payload):
+            raise  Exception("Unreliable payload size")
 
 REGISTRATION = 1100
 PUBLIC_KEY = 1101

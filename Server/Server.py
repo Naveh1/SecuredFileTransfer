@@ -11,6 +11,8 @@ LOCAL_HOST = "127.0.0.1"
 
 VERSION = 3
 TIMES = 4
+BUFFER_SIZE = 1024
+
 class Server:
     host : str
     port : int
@@ -42,6 +44,17 @@ class Server:
     def processManagingClient(self, connection, req, expectedReq = REGISTRATION, repeats = 0):
         doRepeat = True
         reqProc : RequestProcessor = RequestProcessor(req, self.memMngr)
+        payload = b""
+        i = 0
+        while i * BUFFER_SIZE < reqProc.req.payloadSize:
+            i += 1
+            tmp = connection.recv(BUFFER_SIZE)
+            if len(tmp) == 0:
+                raise Exception("payload is too short")
+            payload += tmp
+            if len(payload) > reqProc.req.payloadSize:
+                raise Exception("Payload is too long")
+        reqProc.req.setPayload(payload)
         if reqProc.getCode() == REGISTRATION:
             if expectedReq != REGISTRATION:
                 raise Exception("Unexpected registration")
@@ -119,7 +132,7 @@ class Server:
             while toContinue:
                 try:
                     print("Receiving...")
-                    req = connection.recv(1024)
+                    req = connection.recv(TOTAL_LEN_WITHOUT_PAYLOAD)
                     
                     if len(req) == 0:
                         print("Client has disconnected")
