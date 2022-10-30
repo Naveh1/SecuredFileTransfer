@@ -14,27 +14,13 @@
 #include "AESWrapper.h"
 
 #include "SockHandler.h"
+#include "StringHelper.h"
 
 
 
 bool existsTest(const std::string& name) {
 	std::ifstream f(name.c_str());
 	return f.good();
-}
-
-
-std::string myHexify(const unsigned char* buffer, unsigned int length)
-{
-	std::stringstream ss;
-	std::ios::fmtflags f(ss.flags());
-	ss << std::hex;
-	for (size_t i = 0; i < length; i++)
-		ss << std::setfill('0') << std::setw(2) << (0xFF & buffer[i]);
-		//ss << std::setfill('0') << std::setw(2) << (0xFF & buffer[i]) << (((i + 1) % 16 == 0) ? "\n" : " ");
-	//ss << std::endl;
-	ss.flags(f);
-
-	return ss.str();
 }
 
 
@@ -56,47 +42,12 @@ void createInfoFile(const std::string& name, const std::string& ID)
 	infoFile << name << std::endl;
 	//infoFile << std::hex << ID;
 	//std::cout << std::endl << string_to_hex(ID);
-	infoFile << string_to_hex(ID, REGISTRATION_RESPONSE_PAYLOAD);
+	infoFile << StringHelper::string_to_hex(ID, REGISTRATION_RESPONSE_PAYLOAD);
 	//for (const char& a : ID)
 	//	infoFile << std::hex << a;
 	infoFile << std::endl << Base64Wrapper::encode(rsapriv.getPrivateKey());
 }
 
-
-/*void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data)
-{
-	Sleep(5000);
-
-	std::cout << "Connecting to " << data.ip << " on port " << std::to_string(data.port) << std::endl;
-
-	try {
-		boost::asio::connect(s, resolver.resolve(data.ip, std::to_string(data.port)));
-	}
-	catch (std::exception& e) {
-		std::cerr << "Error connecting: " << e.what() << std::endl;
-		exit(0);
-	}
-}*/
-
-
-/*char* request(tcp::socket& s, const std::vector<char>& req)
-{
-	char* reply = new char[MAX_REPLY_LEN];
-	size_t reply_len = 0;
-	try {
-		boost::asio::write(s, boost::asio::buffer(req));
-
-		//reply_len = boost::asio::read(s, boost::asio::buffer(reply, MAX_REPLY_LEN));
-		reply_len = s.read_some(boost::asio::buffer(reply, MAX_REPLY_LEN));
-
-	}
-	catch (const std::exception& e) {
-		std::cout << e.what() << std::endl;
-		exit(0);
-	}
-
-	return reply;
-}*/
 
 
 UserData registerUser(SockHandler& sock, const InfoFileData& infoData)
@@ -226,46 +177,6 @@ InfoFileData setupUserData()
 }
 
 
-std::string string_to_hex(const std::string& in, const int len = -1) {
-	//std::stringstream ss;
-	size_t stop = len;
-	if (len == -1)
-		stop = in.length();
-	//for (size_t i = 0; i < stop; ++i) {
-	//	ss << std::setw(2) << static_cast<unsigned int>(static_cast<unsigned char>(in[i]));
-	//}
-
-	//return ss.str();
-
-	return myHexify((const unsigned char*)in.c_str(), stop);
-}
-
-
-
-std::string hexToString(const std::string& in) {
-	std::string output;
-
-	if ((in.length() % 2) != 0 || !isHex(in)) {
-		//throw std::runtime_error("String is not valid length ...");
-		std::cerr << "Invalid hex string" << std::endl;
-		exit(0);
-	}
-
-	size_t cnt = in.length() / 2;
-
-	for (size_t i = 0; cnt > i; ++i) {
-		uint32_t s = 0;
-		std::stringstream ss;
-		ss << std::hex << in.substr(i * 2, 2);
-		ss >> s;
-
-		output.push_back(static_cast<unsigned char>(s));
-	}
-
-	return output;
-}
-
-
 UserData processInfoFile() 
 {
 
@@ -281,7 +192,7 @@ UserData processInfoFile()
 	std::getline(infoFile, name);
 	infoFile >> id;
 
-	if (id.size() != CLIENT_ID_LEN * HEX_FACTOR || !isHex(id))
+	if (id.size() != CLIENT_ID_LEN * HEX_FACTOR || !StringHelper::isHex(id))
 	{
 		std::cerr << "Illegal id in info file" << std::endl;
 		exit(0);
@@ -290,7 +201,7 @@ UserData processInfoFile()
 	while (std::getline(infoFile, line))
 		privateKey += line;
 	//infoFile >> privateKey;
-	return { name, hexToString(id), Base64Wrapper::decode(privateKey) };
+	return { name, StringHelper::hexToString(id), Base64Wrapper::decode(privateKey) };
 	//return { name, hexToString(id.substr(0, CLIENT_ID_LEN * 2)), Base64Wrapper::decode(privateKey) };
 }
 
@@ -374,13 +285,13 @@ bool crcReq(SockHandler& sock, const UserData& userData, const std::string& file
 	return true;
 }
 
-bool isHex(const std::string& str)
+/*bool isHex(const std::string& str)
 {
 	for (auto& a : str)
 		if (!std::isxdigit(a))
 			return false;
 	return true;
-}
+}*/
 
 
 int main() 

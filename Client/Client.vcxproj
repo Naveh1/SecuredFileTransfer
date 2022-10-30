@@ -159,6 +159,7 @@
     <ClCompile Include="ResponseProcessor.cpp" />
     <ClCompile Include="RSAWrapper.cpp" />
     <ClCompile Include="SockHandler.cpp" />
+    <ClCompile Include="StringHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -172,6 +173,7 @@
     <ClInclude Include="ResponseProcessor.h" />
     <ClInclude Include="RSAWrapper.h" />
     <ClInclude Include="SockHandler.h" />
+    <ClInclude Include="StringHelper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

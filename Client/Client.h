@@ -59,13 +59,13 @@ UserData registerUser(SockHandler& sock, const InfoFileData&);
 InfoFileData setupUserData();
 UserData processInfoFile();
 //char* request(tcp::socket& s, const std::vector<char>& req);
-std::string string_to_hex(const std::string& in, const int len);
-std::string myHexify(const unsigned char* buffer, unsigned int length);
+//std::string string_to_hex(const std::string& in, const int len);
+//std::string hexToString(const std::string& in);
+//bool isHex(const std::string& str);
+
 passedKey sendKey(SockHandler& sock, const UserData& userData);
-std::string hexToString(const std::string& in);
 std::string decAESKey(const UserData& userData, const passedKey& key);
 std::string decAESKey(const UserData& userData, const passedKey& key);
 std::string encAES(const std::string& key, const std::string& content);
 uint32_t sendFile(SockHandler& sock, const UserData& userData, const std::string& fileName, const std::string& encFileContent);
 bool crcReq(SockHandler& sock, const UserData& userData, const std::string& fileName, const uint16_t code);
-bool isHex(const std::string& str);
