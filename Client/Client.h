@@ -22,6 +22,8 @@
 
 #define HEX_FACTOR 2
 
+class SockHandler;
+
 enum codes { REGISTRATION = 1100, SEND_PUBLIC_KEY, SEND_FILE = 1103, CRC_OK = 1104, CRC_NOT_OK = 1105, CRC_ERROR = 1106 };
 
 using boost::asio::ip::tcp;
@@ -52,18 +54,18 @@ struct passedKey
 
 bool existsTest(const std::string& name);
 void createInfoFile(const std::string& name, const std::string& ID);
-void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data);
-UserData registerUser(tcp::socket& s, const InfoFileData&);
+//void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data);
+UserData registerUser(SockHandler& sock, const InfoFileData&);
 InfoFileData setupUserData();
 UserData processInfoFile();
-char* request(tcp::socket& s, const std::vector<char>& req);
+//char* request(tcp::socket& s, const std::vector<char>& req);
 std::string string_to_hex(const std::string& in, const int len);
 std::string myHexify(const unsigned char* buffer, unsigned int length);
-passedKey sendKey(tcp::socket& s, const UserData& userData);
+passedKey sendKey(SockHandler& sock, const UserData& userData);
 std::string hexToString(const std::string& in);
 std::string decAESKey(const UserData& userData, const passedKey& key);
 std::string decAESKey(const UserData& userData, const passedKey& key);
 std::string encAES(const std::string& key, const std::string& content);
-uint32_t sendFile(tcp::socket& s, const UserData& userData, const std::string& fileName, const std::string& encFileContent);
-bool crcReq(tcp::socket& s, const UserData& userData, const std::string& fileName, const uint16_t code);
+uint32_t sendFile(SockHandler& sock, const UserData& userData, const std::string& fileName, const std::string& encFileContent);
+bool crcReq(SockHandler& sock, const UserData& userData, const std::string& fileName, const uint16_t code);
 bool isHex(const std::string& str);

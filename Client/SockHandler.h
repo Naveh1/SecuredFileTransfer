@@ -9,12 +9,13 @@ using boost::asio::ip::tcp;
 class SockHandler
 {
 public:
-	SockHandler();
-	void connect(const int port, const std::string& ip);
+	SockHandler(const int port, const std::string& ip);
 	char* request(const std::vector<char>& req);
 
 private:
 	boost::asio::io_context _io_context;
 	tcp::socket _s = tcp::socket(_io_context);
 	tcp::resolver _resolver = tcp::resolver(_io_context);
+	void connect(const int port, const std::string& ip);
+
 };

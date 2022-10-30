@@ -63,7 +63,7 @@ void createInfoFile(const std::string& name, const std::string& ID)
 }
 
 
-void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data)
+/*void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data)
 {
 	Sleep(5000);
 
@@ -76,10 +76,10 @@ void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data)
 		std::cerr << "Error connecting: " << e.what() << std::endl;
 		exit(0);
 	}
-}
+}*/
 
 
-char* request(tcp::socket& s, const std::vector<char>& req)
+/*char* request(tcp::socket& s, const std::vector<char>& req)
 {
 	char* reply = new char[MAX_REPLY_LEN];
 	size_t reply_len = 0;
@@ -96,10 +96,10 @@ char* request(tcp::socket& s, const std::vector<char>& req)
 	}
 
 	return reply;
-}
+}*/
 
 
-UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
+UserData registerUser(SockHandler& sock, const InfoFileData& infoData)
 {
 
 	//send registration request
@@ -112,7 +112,7 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 
 	//std::string reply(MAX_REPLY_LEN, '\0');
 
-	char* reply = request(s, req.serializeResponse());
+	char* reply = sock.request(req.serializeResponse());
 
 	//std::cout << std::string(reply) << std::endl;		//debug
 	ResponseProcessor resp(reply);
@@ -137,7 +137,7 @@ UserData registerUser(tcp::socket & s, const InfoFileData& infoData)
 }
 
 
-passedKey sendKey(tcp::socket& s, const UserData& userData)
+passedKey sendKey(SockHandler& sock, const UserData& userData)
 {
 	RSAPrivateWrapper pKey(userData.privateKey);
 	//std::cout << string_to_hex(pKey.getPublicKey(), -1) << std::endl;
@@ -155,7 +155,7 @@ passedKey sendKey(tcp::socket& s, const UserData& userData)
 	//auto a = req.serializeResponse();
 	//std::cout << std::endl << std::endl << string_to_hex(std::string(a.begin(), a.end()).c_str(), a.size()) << '\t' << a.size() << std::endl;
 	//RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_PUBLIC_KEY, (uint32_t)(NAME_LEN + PUBLICKEY_LEN), (name + pKey.getPublicKey()).c_str(), userData.userId.c_str());
-	char* reply = request(s, req.serializeResponse());
+	char* reply = sock.request(req.serializeResponse());
 
 
 	ResponseProcessor resp(reply);
@@ -337,14 +337,14 @@ std::string encAES(const std::string& key, const std::string& content)
 }
 
 
-uint32_t sendFile(tcp::socket& s, const UserData& userData, const std::string& fileName, const std::string& encFileContent)
+uint32_t sendFile(SockHandler& sock, const UserData& userData, const std::string& fileName, const std::string& encFileContent)
 {
 	//SEND_FILE
 	char* payload = RequestProcessor::getFilePayload(userData.userId.c_str(), fileName, encFileContent);
 	RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_FILE, (uint32_t)(CLIENT_ID_LEN + CONTENT_SIZE_SIZE
 		+ FILE_NAME_LEN + encFileContent.size()), payload, userData.userId.c_str());
 
-	char* reply = request(s, req.serializeResponse());
+	char* reply = sock.request(req.serializeResponse());
 
 	delete payload;
 
@@ -356,12 +356,12 @@ uint32_t sendFile(tcp::socket& s, const UserData& userData, const std::string& f
 	return crc;
 }
 
-bool crcReq(tcp::socket& s, const UserData& userData, const std::string& fileName, const uint16_t code)
+bool crcReq(SockHandler& sock, const UserData& userData, const std::string& fileName, const uint16_t code)
 {
 	char* payload = RequestProcessor::getCrcPayload(userData.userId.c_str(), fileName);
 	RequestProcessor req((uint8_t)VERSION, (uint16_t)code, (uint32_t)(CLIENT_ID_LEN + FILE_NAME_LEN), payload, userData.userId.c_str());
 
-	char* reply = request(s, req.serializeResponse());
+	char* reply = sock.request(req.serializeResponse());
 
 	delete payload;
 
@@ -385,28 +385,27 @@ bool isHex(const std::string& str)
 
 int main() 
 {
-	boost::asio::io_context io_context;
-	tcp::socket s(io_context);
-	tcp::resolver resolver(io_context);
+	Sleep(5000); //Giving the server time to turn on - debug
 	UserData userData;
 	InfoFileData infoData = setupUserData();
+	SockHandler sockHandler(infoData.port, infoData.ip);
 	
 	//file = setupServer();
 
-	connect(s, resolver, infoData);
+	//connect(s, resolver, infoData);
 
 	//std::ifstream infoFile(INFO_FILE);
 	//if (!infoFile)
 	if(!existsTest(INFO_FILE))
 	{
-		userData = registerUser(s, infoData);
+		userData = registerUser(sockHandler, infoData);
 
 		createInfoFile(userData.userName, userData.userId);
 	}
 
 	userData = processInfoFile();
 
-	passedKey aesKey = sendKey(s, userData);
+	passedKey aesKey = sendKey(sockHandler, userData);
 
 	std::string AESkey = decAESKey(userData, aesKey);
 
@@ -424,18 +423,18 @@ int main()
 
 	//std::cout << string_to_hex(encContent) << std::endl;
 	
-	resCrc = sendFile(s, userData, infoData.file, encContent);
+	resCrc = sendFile(sockHandler, userData, infoData.file, encContent);
 
 	while (resCrc != crc && ++times <= FILE_SENDING_TIMES) 
 	{
 		//std::cout << crc << "\t---\t" << resCrc << std::endl;
-		if (!crcReq(s, userData, infoData.file, CRC_NOT_OK))
+		if (!crcReq(sockHandler, userData, infoData.file, CRC_NOT_OK))
 		{
 			delete aesKey.key;
 			return 0;
 		}
 		std::cout << "Sending file for the " << times + 1 << " time." << std::endl;
-		resCrc = sendFile(s, userData, infoData.file, encContent);
+		resCrc = sendFile(sockHandler, userData, infoData.file, encContent);
 	}
 
 	uint16_t code = CRC_OK;
@@ -447,7 +446,7 @@ int main()
 		code = CRC_ERROR;
 	}
 
-	crcReq(s, userData, infoData.file, code);
+	crcReq(sockHandler, userData, infoData.file, code);
 	delete aesKey.key;
 
 	return 0;

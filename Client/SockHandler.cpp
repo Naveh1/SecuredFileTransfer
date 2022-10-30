@@ -1,6 +1,9 @@
 #include "SockHandler.h"
 
-SockHandler::SockHandler() {}
+SockHandler::SockHandler(const int port, const std::string& ip) 
+{
+	connect(port, ip);
+}
 
 
 void SockHandler::connect(const int port, const std::string& ip)
