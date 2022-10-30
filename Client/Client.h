@@ -2,25 +2,17 @@
 
 #include <iostream>
 #include <boost/asio.hpp>
+#include "Helper.h"
 
 
 #define PUBLICKEY_LEN 160
 
 #define RESPONSE_HEAD_LEN 7
-#define REGISTRATION_RESPONSE_PAYLOAD 16
 
 #define FILE_SENDING_TIMES 3
 
-#define INFO_FILE "me.info"
-#define TRANSFER_INFO_FILE "transfer.info"
-
-#define NAME_LEN_IN_FILE 100
 #define VERSION 3
 
-#define MIN_PORT 1024
-#define MAX_PORT 65536
-
-#define HEX_FACTOR 2
 
 class SockHandler;
 
@@ -28,6 +20,7 @@ enum codes { REGISTRATION = 1100, SEND_PUBLIC_KEY, SEND_FILE = 1103, CRC_OK = 11
 
 using boost::asio::ip::tcp;
 
+/*
 struct InfoFileData
 {
 	std::string ip;
@@ -50,22 +43,18 @@ struct passedKey
 	char* key;
 	unsigned int len;
 };
-
+*/
 
 bool existsTest(const std::string& name);
 void createInfoFile(const std::string& name, const std::string& ID);
-//void connect(tcp::socket& s, tcp::resolver& resolver, const InfoFileData& data);
-UserData registerUser(SockHandler& sock, const InfoFileData&);
 InfoFileData setupUserData();
 UserData processInfoFile();
-//char* request(tcp::socket& s, const std::vector<char>& req);
-//std::string string_to_hex(const std::string& in, const int len);
-//std::string hexToString(const std::string& in);
-//bool isHex(const std::string& str);
 
-passedKey sendKey(SockHandler& sock, const UserData& userData);
 std::string decAESKey(const UserData& userData, const passedKey& key);
 std::string decAESKey(const UserData& userData, const passedKey& key);
 std::string encAES(const std::string& key, const std::string& content);
+
+UserData registerUser(SockHandler& sock, const InfoFileData&);
+passedKey sendKey(SockHandler& sock, const UserData& userData);
 uint32_t sendFile(SockHandler& sock, const UserData& userData, const std::string& fileName, const std::string& encFileContent);
 bool crcReq(SockHandler& sock, const UserData& userData, const std::string& fileName, const uint16_t code);

@@ -285,14 +285,6 @@ bool crcReq(SockHandler& sock, const UserData& userData, const std::string& file
 	return true;
 }
 
-/*bool isHex(const std::string& str)
-{
-	for (auto& a : str)
-		if (!std::isxdigit(a))
-			return false;
-	return true;
-}*/
-
 
 int main() 
 {
