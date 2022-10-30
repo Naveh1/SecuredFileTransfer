@@ -39,6 +39,7 @@ struct passedKey
 
 class Helper
 {
+public:
 	static bool existsTest(const std::string& name);
 	static void createInfoFile(const std::string& name, const std::string& ID);
 	static InfoFileData setupUserData();

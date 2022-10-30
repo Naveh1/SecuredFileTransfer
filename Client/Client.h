@@ -45,9 +45,9 @@ struct passedKey
 };
 */
 
-bool existsTest(const std::string& name);
-void createInfoFile(const std::string& name, const std::string& ID);
-InfoFileData setupUserData();
+//bool existsTest(const std::string& name);
+//void createInfoFile(const std::string& name, const std::string& ID);
+//InfoFileData setupUserData();
 UserData processInfoFile();
 
 std::string decAESKey(const UserData& userData, const passedKey& key);
