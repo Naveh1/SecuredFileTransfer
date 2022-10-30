@@ -13,6 +13,9 @@
 #include "RSAWrapper.h"
 #include "AESWrapper.h"
 
+#include "SockHandler.h"
+
+
 
 bool existsTest(const std::string& name) {
 	std::ifstream f(name.c_str());
