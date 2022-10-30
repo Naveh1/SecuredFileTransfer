@@ -15,6 +15,7 @@
 
 #include "SockHandler.h"
 #include "StringHelper.h"
+#include "EncHelper.h"
 
 
 
@@ -91,20 +92,6 @@ passedKey sendKey(SockHandler& sock, const UserData& userData)
 }
 
 
-std::string decAESKey(const UserData& userData, const passedKey& key)
-{
-	RSAPrivateWrapper pKey(userData.privateKey);
-	
-	try {
-		return pKey.decrypt(key.key, key.len);
-	}
-	catch (const std::exception& e){
-		std::cout << "Decryption error: " << e.what() << std::endl;
-		return "";
-	}
-}
-
-
 std::string getFileContent(const std::string& path)
 {
 	std::ifstream file(path, std::ios::binary);
@@ -122,14 +109,6 @@ std::string getFileContent(const std::string& path)
 	std::string data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
 	return data;
-}
-
-
-std::string encAES(const std::string& key, const std::string& content)
-{
-	AESWrapper eKey((unsigned char*)key.c_str(), key.size());
-
-	return eKey.encrypt(content.c_str(), content.size());
 }
 
 
@@ -195,7 +174,7 @@ int main()
 
 	passedKey aesKey = sendKey(sockHandler, userData);
 
-	std::string AESkey = decAESKey(userData, aesKey);
+	std::string AESkey = EncHelper::decAESKey(userData, aesKey);
 
 	//std::cout << string_to_hex(AESkey, AESkey.size()) << std::endl;
 
@@ -205,7 +184,7 @@ int main()
 	crcCalc.update((unsigned char*)content.c_str(), content.size());
 	uint32_t crc = crcCalc.digest();
 
-	std::string encContent = encAES(AESkey, content);
+	std::string encContent = EncHelper::encAES(AESkey, content);
 	//encContent = content; // debug
 	uint32_t resCrc = 0, times = 0;
 
