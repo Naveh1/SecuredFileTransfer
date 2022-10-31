@@ -107,6 +107,8 @@ class MemoryManager:
                     break
             if not found:
                 MemoryManager.createDir(SERVER_DIR + "/" + tmpID)
+            else:
+                fullPath = f.pathName
             
             #fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + bytes.fromhex(fileName.hex().rstrip('00')).decode("utf-8")
             #fullPath = SERVER_DIR + "/" + str(tmpID) + "/" + str(fileName)

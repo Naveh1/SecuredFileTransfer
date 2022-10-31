@@ -33,7 +33,8 @@ char* SockHandler::request(const std::vector<char>& req)
 
 	}
 	catch (const std::exception& e) {
-		std::cout << e.what() << std::endl;
+		std::cerr << "Server closed the connection." << std::endl;
+		//std::cout << e.what() << std::endl;
 		exit(0);
 	}
 

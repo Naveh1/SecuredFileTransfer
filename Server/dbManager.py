@@ -133,7 +133,6 @@ class dbManager:
         cur.execute("UPDATE clients SET %s = ? , LastSeen = datetime('now','localtime') WHERE ID = ?" % (column), (value, key))
         cur.close()
         self.conn.commit()
-        self.conn.commit()
              
     def getClient(self, ID) -> str:
         cur = self.conn.cursor()
@@ -150,11 +149,14 @@ class dbManager:
     def validateFile(self, ID, fileName):
         cur = self.conn.cursor()
         #print("Name: " + str(name))
-        cur.execute("UPDATE files SET Verified = True WHERE ID = ? AND FileName = ?", (ID.hex(), fileName))
+        cur.execute("UPDATE files SET Verified = 1 WHERE ID = ? AND FileName = ?", (ID.hex(), fileName))
         cur.close()
+        self.conn.commit()
+
 
     def removeFile(self, ID, fileName):
         cur = self.conn.cursor()
         #print("Name: " + str(name))
         cur.execute("DELETE FROM files WHERE ID = ? AND FileName = ?", (ID.hex(), fileName))
         cur.close()
+        self.conn.commit()
