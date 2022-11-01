@@ -6,7 +6,7 @@ std::string Base64Wrapper::encode(const std::string& str)
 	std::string encoded;
 	CryptoPP::StringSource ss(str, true,
 		new CryptoPP::Base64Encoder(
-			new CryptoPP::StringSink(encoded)
+			new CryptoPP::StringSink(encoded), false
 		) // Base64Encoder
 	); // StringSource
 

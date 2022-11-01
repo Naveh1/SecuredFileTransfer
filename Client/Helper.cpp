@@ -117,9 +117,9 @@ UserData Helper::processInfoFile()
 		std::cerr << "Illegal id in info file" << std::endl;
 		exit(0);
 	}
-
-	while (std::getline(infoFile, line))
-		privateKey += line;
+	infoFile >> line;
+	//while (std::getline(infoFile, line))
+	//	privateKey += line;
 	//infoFile >> privateKey;
 	return { name, StringHelper::hexToString(id), Base64Wrapper::decode(privateKey) };
 	//return { name, hexToString(id.substr(0, CLIENT_ID_LEN * 2)), Base64Wrapper::decode(privateKey) };
