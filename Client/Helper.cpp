@@ -102,7 +102,7 @@ InfoFileData Helper::setupUserData()
 UserData Helper::processInfoFile()
 {
 
-	std::string name, id, privateKey, line;
+	std::string name, id, privateKey, decodedPrivateKey;
 	std::ifstream infoFile = std::ifstream(INFO_FILE);
 	if (!infoFile)
 	{
@@ -124,11 +124,19 @@ UserData Helper::processInfoFile()
 	//if (privateKey.size() != PRIVATE_KEY_IN_BASE64_LEN)
 	if (privateKey.size() == 0)
 	{
+		std::cerr << "Illegal private key size" << std::endl;
+		exit(0);
+	}
+
+	try {
+		decodedPrivateKey = Base64Wrapper::decode(privateKey);
+	}
+	catch (const std::exception&) {
 		std::cerr << "Invalid RSA private key size in our format (base64)" << std::endl;
 		exit(0);
 	}
 
-	return { name, StringHelper::hexToString(id), Base64Wrapper::decode(privateKey) };
+	return { name, StringHelper::hexToString(id), decodedPrivateKey};
 	//return { name, hexToString(id.substr(0, CLIENT_ID_LEN * 2)), Base64Wrapper::decode(privateKey) };
 }
 
