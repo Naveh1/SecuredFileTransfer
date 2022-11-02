@@ -18,19 +18,11 @@
 #include "EncHelper.h"
 
 
-
+//Registering user: getting the socket handler and the user's data from info file, then sending it by the protocol to the server and returning the result from the server
 UserData registerUser(SockHandler& sock, const InfoFileData& infoData)
 {
 
-	//send registration request
 	RequestProcessor req(VERSION, REGISTRATION, NAME_LEN, infoData.name.c_str());
-	/*auto requ = req.serializeResponse(true);
-	std::cout << "len: "  << requ.size() << std::endl;
-	for (char r : requ)
-		std::cout << r;
-	std::cout << std::endl;*/
-
-	//std::string reply(MAX_REPLY_LEN, '\0');
 
 	char* reply = sock.request(req.serializeResponse());
 
@@ -38,17 +30,11 @@ UserData registerUser(SockHandler& sock, const InfoFileData& infoData)
 	ResponseProcessor resp(reply);
 
 	resp.processResponse();
-	if (resp.getCode() == REGISTRATION_SUCCESS) {
-		//std::cout << "ID: " << resp.getPayload() << std::endl;		//debug
-		std::cout << "";
-		//for (const char& i : std::string(resp.getPayload()))
-		//	std::cout << std::hex << (uint8_t)i;				//debug
-	}
-	else  if (resp.getCode() == REGISTRATION_FAIL) {
+	if (resp.getCode() == REGISTRATION_FAIL) {
 		std::cerr << "Registration failed" << std::endl;
 		exit(0);
 	}
-	else
+	else if(resp.getCode() != REGISTRATION_SUCCESS)
 		std::cerr << "Unknown code" << std::endl;
 
 	delete reply;
@@ -56,25 +42,18 @@ UserData registerUser(SockHandler& sock, const InfoFileData& infoData)
 	return {infoData.name, resp.getPayload(), ""};
 }
 
-
+//Getting the user's data, making the public key out of it and sending it to the server and returning the AES key we are getting from the server
 passedKey sendKey(SockHandler& sock, const UserData& userData)
 {
 	RSAPrivateWrapper pKey(userData.privateKey);
-	//std::cout << string_to_hex(pKey.getPublicKey(), -1) << std::endl;
-	//std::cout << "public key size: " << pKey.getPublicKey().size() << std::endl;
-	//std::string name = RequestProcessor::padName(userData.userName);
+
 	char payload[NAME_LEN + PUBLICKEY_LEN] = { '\0' };
 	memcpy(payload, userData.userName.c_str(), userData.userName.size());
 	memcpy(payload + NAME_LEN, pKey.getPublicKey().c_str(), PUBLICKEY_LEN);
-	//std::cout << payload;
-	//std::cout << pKey.getPublicKey();
-	//std::cout << "Public key: " << string_to_hex(pKey.getPublicKey(), -1) << std::endl;
+
 
 	RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_PUBLIC_KEY, (uint32_t)(NAME_LEN + PUBLICKEY_LEN), payload, userData.userId.c_str());
-	//std::cout << string_to_hex(req.getPayload(), 415);
-	//auto a = req.serializeResponse();
-	//std::cout << std::endl << std::endl << string_to_hex(std::string(a.begin(), a.end()).c_str(), a.size()) << '\t' << a.size() << std::endl;
-	//RequestProcessor req((uint8_t)VERSION, (uint16_t)SEND_PUBLIC_KEY, (uint32_t)(NAME_LEN + PUBLICKEY_LEN), (name + pKey.getPublicKey()).c_str(), userData.userId.c_str());
+
 	char* reply = sock.request(req.serializeResponse());
 
 
@@ -91,27 +70,7 @@ passedKey sendKey(SockHandler& sock, const UserData& userData)
 	return { aesDynamic,  ENC_AES_KEY_LEN };
 }
 
-
-std::string getFileContent(const std::string& path)
-{
-	std::ifstream file(path, std::ios::binary);
-
-	if (!file) {
-		std::cerr << "Error reading file" << std::endl;
-		exit(0);
-	}
-
-	//std::string data;
-	//  std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
-	//  std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
-	std::string data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
-	return data;
-}
-
-
+//Getting the full file (already encrypted) and sending it to the server by the protocol, than returning the crc from the server's response
 uint32_t sendFile(SockHandler& sock, const UserData& userData, const std::string& fileName, const std::string& encFileContent)
 {
 	//SEND_FILE
@@ -131,6 +90,7 @@ uint32_t sendFile(SockHandler& sock, const UserData& userData, const std::string
 	return crc;
 }
 
+//Handling crc requests
 bool crcReq(SockHandler& sock, const UserData& userData, const std::string& fileName, const uint16_t code)
 {
 	char* payload = RequestProcessor::getCrcPayload(userData.userId.c_str(), fileName);
@@ -152,6 +112,7 @@ bool crcReq(SockHandler& sock, const UserData& userData, const std::string& file
 
 int main() 
 {
+	std::cout << "Letting the server time to come up when running both the client and the server at the same time - debug, 5 seconds: " << std::endl;
 	Sleep(5000); //Giving the server time to turn on - debug
 	UserData userData;
 	InfoFileData infoData = Helper::setupUserData();
@@ -178,7 +139,7 @@ int main()
 
 	//std::cout << string_to_hex(AESkey, AESkey.size()) << std::endl;
 
-	std::string content = getFileContent(infoData.file);
+	std::string content = Helper::getFileContent(infoData.file);
 
 	CRC crcCalc = CRC();
 	crcCalc.update((unsigned char*)content.c_str(), content.size());

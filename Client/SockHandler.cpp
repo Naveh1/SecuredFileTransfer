@@ -1,11 +1,12 @@
 #include "SockHandler.h"
 
+//C'tor
 SockHandler::SockHandler(const int port, const std::string& ip) 
 {
 	connect(port, ip);
 }
 
-
+//Connecting to server by port and ip
 void SockHandler::connect(const int port, const std::string& ip)
 {
 	std::cout << "Connecting to " << ip << " on port " << std::to_string(port) << std::endl;
@@ -20,7 +21,7 @@ void SockHandler::connect(const int port, const std::string& ip)
 }
 
 
-
+//Sending request to server
 char* SockHandler::request(const std::vector<char>& req)
 {
 	char* reply = new char[MAX_REPLY_LEN];

@@ -17,12 +17,8 @@ public:
 	~RequestProcessor();
 
 	std::vector<char> serializeResponse() const;
-	std::string responseToString() const;
 
-	template <typename T>
-	static std::string numberToBytes(const T number, const int len);
-
-	char* getPayload() const { return _payload; };
+	const char* getPayload() const { return _payload; };
 
 	static char* getFilePayload(const char* ID, const std::string& fileName, const std::string& fileContent);
 	static char* getCrcPayload(const char* ID, const std::string& fileName);
@@ -33,6 +29,12 @@ private:
 	uint32_t _payloadSize;
 
 	char* _payload;
+
+	std::string requestToString() const;
+
+	template <typename T>
+	static std::string numberToBytes(const T number, const int len);
+
 };
 
 

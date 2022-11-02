@@ -12,12 +12,13 @@
 #include <boost/asio.hpp>
 using boost::asio::ip::tcp;
 
+//Checking if a file exists
 bool Helper::existsTest(const std::string& name) {
 	std::ifstream f(name.c_str());
 	return f.good();
 }
 
-
+//Getting user's name and id and writing it to a file together with a private key we are generating
 void Helper::createInfoFile(const std::string& name, const std::string& ID)
 {
 	// 1. Create an RSA decryptor. this is done here to generate a new private/public key pair
@@ -42,7 +43,7 @@ void Helper::createInfoFile(const std::string& name, const std::string& ID)
 	infoFile << std::endl << Base64Wrapper::encode(rsapriv.getPrivateKey());
 }
 
-
+//Reading the user's data from a file and making sure its in the right format
 InfoFileData Helper::setupUserData()
 {
 	std::string line, ip, name, file;
@@ -97,6 +98,7 @@ InfoFileData Helper::setupUserData()
 }
 
 
+//Processing the info file, we are creating an object, reading line by line and making sure each line is in the right format
 UserData Helper::processInfoFile()
 {
 
@@ -117,10 +119,31 @@ UserData Helper::processInfoFile()
 		std::cerr << "Illegal id in info file" << std::endl;
 		exit(0);
 	}
-	infoFile >> line;
-	//while (std::getline(infoFile, line))
-	//	privateKey += line;
-	//infoFile >> privateKey;
+
+	infoFile >> privateKey;
+	//if (privateKey.size() != PRIVATE_KEY_IN_BASE64_LEN)
+	if (privateKey.size() == 0)
+	{
+		std::cerr << "Invalid RSA private key size in our format (base64)" << std::endl;
+		exit(0);
+	}
+
 	return { name, StringHelper::hexToString(id), Base64Wrapper::decode(privateKey) };
 	//return { name, hexToString(id.substr(0, CLIENT_ID_LEN * 2)), Base64Wrapper::decode(privateKey) };
+}
+
+
+//Reading the full file we want to transfer
+std::string Helper::getFileContent(const std::string& path)
+{
+	std::ifstream file(path, std::ios::binary);
+
+	if (!file) {
+		std::cerr << "Error reading file" << std::endl;
+		exit(0);
+	}
+
+	std::string data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+	return data;
 }

@@ -5,6 +5,7 @@
 #include "AESWrapper.h"
 
 
+//decrypting encrypted aes key
 std::string EncHelper::decAESKey(const UserData& userData, const passedKey& key)
 {
 	RSAPrivateWrapper pKey(userData.privateKey);
@@ -18,7 +19,7 @@ std::string EncHelper::decAESKey(const UserData& userData, const passedKey& key)
 	}
 }
 
-
+//AES encrypting content
 std::string EncHelper::encAES(const std::string& key, const std::string& content)
 {
 	AESWrapper eKey((unsigned char*)key.c_str(), key.size());

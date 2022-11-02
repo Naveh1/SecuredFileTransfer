@@ -44,4 +44,5 @@ public:
 	static void createInfoFile(const std::string& name, const std::string& ID);
 	static InfoFileData setupUserData();
 	static UserData processInfoFile();
+	static std::string getFileContent(const std::string& path);
 };

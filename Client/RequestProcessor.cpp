@@ -4,6 +4,7 @@
 
 #define REG_REQ_CODE 1100
 
+//Padding string so it will be in the right length for the protocol
 std::string padString(const std::string& str, const int len)
 {
     if (len - str.size() <= 0)
@@ -17,7 +18,7 @@ std::string padString(const std::string& str, const int len)
     }
 }
 
-
+//Processing request data and making it ready for serialization
 RequestProcessor::RequestProcessor(const uint8_t version, const uint16_t code, const uint32_t payloadSize, const char* payload, const char clientID[CLIENT_ID_LEN]) : _version(version), _code(code), _payloadSize(payloadSize)
 {
     memcpy_s(_clientID, CLIENT_ID_LEN, clientID, CLIENT_ID_LEN);
@@ -26,21 +27,23 @@ RequestProcessor::RequestProcessor(const uint8_t version, const uint16_t code, c
     memcpy_s(_payload, payloadSize, payload, payloadSize);
 }
 
+//D'tor: Deleting dynamic memory
 RequestProcessor::~RequestProcessor()
 {
     delete[] _payload;
 }
 
+//Serializing reponse so it will be ready to get sent to the server
 std::vector<char> RequestProcessor::serializeResponse() const
 {
-    std::string str = responseToString();
+    std::string str = requestToString();
     std::vector<char> bytes(str.begin(), str.end());
     //bytes.push_back('\0');
     return bytes;
 }
 
-
-std::string RequestProcessor::responseToString() const
+//Taking the request data and making it to on string 
+std::string RequestProcessor::requestToString() const
 {
     //int offset = nullTerminator ? 1 : 0;
     std::string res = padString(std::string(_clientID, CLIENT_ID_LEN), CLIENT_ID_LEN) + numberToBytes<uint8_t>(_version, VERSION_LEN);
@@ -53,7 +56,7 @@ std::string RequestProcessor::responseToString() const
         return res + padString(std::string(_payload, _payloadSize), _payloadSize/* - offset*/);
 }
 
-
+//Moving a number into bytes string for sending in binary format
 template <typename T>
 std::string RequestProcessor::numberToBytes(const T number, const int len)
 {
@@ -69,7 +72,7 @@ std::string RequestProcessor::numberToBytes(const T number, const int len)
     return res;
 }
 
-
+//Creating file sending request payload from data
 char* RequestProcessor::getFilePayload(const char* ID, const std::string& fileName, const std::string& fileContent)
 {
     std::string res = padString(std::string(ID, CLIENT_ID_LEN), CLIENT_ID_LEN) + padString(numberToBytes<uint32_t>(fileContent.size(), CONTENT_SIZE_SIZE), CONTENT_SIZE_SIZE);
@@ -83,7 +86,7 @@ char* RequestProcessor::getFilePayload(const char* ID, const std::string& fileNa
     return tmp;
 }
 
-
+//Creating crc request payload from data
 char* RequestProcessor::getCrcPayload(const char* ID, const std::string& fileName)
 {
     std::string res = padString(std::string(ID, CLIENT_ID_LEN), CLIENT_ID_LEN) + padString(fileName, FILE_NAME_LEN);

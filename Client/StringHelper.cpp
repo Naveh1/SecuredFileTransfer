@@ -5,6 +5,7 @@
 #include <osrng.h>
 
 
+//Turning text string into a hex string
 std::string StringHelper::string_to_hex(const std::string& in, const int len ) {
 	//std::stringstream ss;
 	size_t stop = len;
@@ -19,7 +20,7 @@ std::string StringHelper::string_to_hex(const std::string& in, const int len ) {
 	return myHexify((const unsigned char*)in.c_str(), stop);
 }
 
-
+//Turning text string into a hex string
 std::string StringHelper::myHexify(const unsigned char* buffer, unsigned int length)
 {
 	std::stringstream ss;
@@ -34,7 +35,7 @@ std::string StringHelper::myHexify(const unsigned char* buffer, unsigned int len
 	return ss.str();
 }
 
-
+//Turning hex string into a text string
 std::string StringHelper::hexToString(const std::string& in) {
 	std::string output;
 
@@ -58,6 +59,7 @@ std::string StringHelper::hexToString(const std::string& in) {
 	return output;
 }
 
+//Checking if string is a hex string
 bool StringHelper::isHex(const std::string& str)
 {
 	for (auto& a : str)
