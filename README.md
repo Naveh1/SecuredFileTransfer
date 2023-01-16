@@ -1,4 +1,4 @@
-# Maman15
+# SecuredFileTransfer
 DefensiveProgrammingProject
 
 This program is a secured file-transfer between c++ client and python server, it is based on AES symetric encryption.
